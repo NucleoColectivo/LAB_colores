@@ -39,7 +39,8 @@ import {
   CheckCircle2,
   Clock,
   Trash2,
-  Zap
+  Zap,
+  Bell
 } from 'lucide-react';
 
 interface CoCreationAdvancesProps {
@@ -48,6 +49,8 @@ interface CoCreationAdvancesProps {
   onAddAdvance: (advance: WorkshopAdvance) => void;
   onDeleteAdvance?: (id: string | number) => void;
   onRefresh?: () => void;
+  onOpenNotifications?: () => void;
+  unreadNotificationCount?: number;
 }
 
 export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
@@ -55,7 +58,9 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   advances,
   onAddAdvance,
   onDeleteAdvance,
-  onRefresh
+  onRefresh,
+  onOpenNotifications,
+  unreadNotificationCount = 0
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [filterType, setFilterType] = useState<'todos' | 'individual' | 'colectivo'>('todos');
@@ -436,6 +441,40 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
             <span>Exportar para repositorio (.md)</span>
           </button>
         </div>
+      </div>
+
+      {/* PROMPT SUGGESTIONS NOTIFICATION BANNER */}
+      <div className="mb-4 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-[#171324] via-[#1a1829] to-[#121212] border-2 border-[#7656ff]/60 text-white flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+        <div className="flex items-start sm:items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-[#7656ff] text-white flex items-center justify-center shrink-0 shadow-md">
+            <Zap className="w-5 h-5 fill-current" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <strong className="text-sm sm:text-base font-black text-white">
+                Sistema de Notificaciones: Prompts Generativos de Avances
+              </strong>
+              {unreadNotificationCount > 0 && (
+                <span className="px-2.5 py-0.5 rounded-full bg-[#f8c300] text-[#111111] text-[10px] font-black uppercase tracking-wider animate-pulse">
+                  {unreadNotificationCount} {unreadNotificationCount === 1 ? 'nuevo aviso' : 'nuevos avisos'}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-stone-300 mt-0.5">
+              Cada avance registrado dispara sugerencias de prompts para Runway, Midjourney y p5.js adaptadas a los intereses de tu mesa de trabajo.
+            </p>
+          </div>
+        </div>
+
+        {onOpenNotifications && (
+          <button
+            onClick={onOpenNotifications}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#7656ff] hover:bg-[#6545e8] text-white font-bold rounded-full text-xs transition cursor-pointer shrink-0 shadow-sm active:scale-95 self-start sm:self-auto"
+          >
+            <Bell className="w-3.5 h-3.5" />
+            <span>Ver Centro de Avisos</span>
+          </button>
+        )}
       </div>
 
       {/* REPOSITORY & VERCEL QUICK CONNECTOR BANNER */}

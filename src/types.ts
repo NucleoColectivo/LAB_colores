@@ -388,45 +388,7 @@ export const INITIAL_SEED_DATA: ParticipantContribution[] = [
     memory: "Exploración de la frontera entre el arte sensible y los modelos generativos de IA en comunidad.",
     wish: "Consolidar el Laboratorio de Medios Digitales e IA como un espacio vivo de co-creación y experimentación abierta.",
     resources: "Dirección creativa, diseño estratégico, programación, experimentación con IA y gestión comunitaria.",
-    createdAt: "2026-10-24T09:00:00.000Z"
-  },
-  {
-    id: 1719820000001,
-    name: "Lucía Morales Mendoza",
-    alias: "Lucía M.",
-    email: "lucia.morales.arte@gmail.com",
-    phone: "+57 312 456 7890",
-    location: "Barrio San Antonio / Cali",
-    organization: "Taller Gráfico La Madriguera",
-    social: "@lucia_grabado",
-    shareContact: true,
-    dataConsent: true,
-    role: "Artista o creador/a",
-    languages: ["Imagen e ilustración", "Fotografía y memoria visual", "Cartografía y territorio"],
-    themes: "Memorias del río, árboles antiguos del barrio, relatos de abuelas",
-    memory: "Las tardes en la casa de mi abuela cosiendo retazos mientras escuchábamos la radio comunitaria.",
-    wish: "Poder hacer un fanzine con mapas bordados y fotografías antiguas de los vecinos para repartir en las tiendas.",
-    resources: "Cámara digital, acuarelas, scanner casero y muchas ganas de entrevistar adultos mayores.",
-    createdAt: "2026-10-24T09:14:00.000Z"
-  },
-  {
-    id: 1719820000002,
-    name: "Camilo Rengifo Ortiz",
-    alias: "Camilo R.",
-    email: "camilo.creativecode@gmail.com",
-    phone: "+57 301 987 6543",
-    location: "Comuna 4 / Medellín",
-    organization: "Colectivo Sintético Lab",
-    social: "github.com/camilo-code",
-    shareContact: true,
-    dataConsent: true,
-    role: "Estudiante",
-    languages: ["Programación creativa", "IA y experimentación", "Sonido y música"],
-    themes: "Música generativa, datos bioclimáticos, inteligencia artificial aplicada al paisaje sonoro",
-    memory: "La primera vez que un sketch en p5.js comenzó a modular frecuencias sonoras según la temperatura ambiental.",
-    wish: "Desarrollar una instalación interactiva donde las plantas del parque comunal generen melodías audibles.",
-    resources: "Laptop, sensores básicos Arduino, teclado MIDI y conocimientos en p5.js y Python.",
-    createdAt: "2026-10-24T09:22:00.000Z"
+    createdAt: "2026-10-24T07:43:04.063Z"
   }
 ];
 
@@ -521,31 +483,6 @@ export const INITIAL_SEED_ADVANCES: WorkshopAdvance[] = [
     status: "prototipo",
     mediaUrl: "https://lab-colores.vercel.app/",
     createdAt: "2026-10-24T09:45:00.000Z"
-  },
-  {
-    id: "adv-2",
-    type: "colectivo",
-    title: "Alianza Imagen + Código Sonoro: Fanzine reactivo del río",
-    authors: ["Lucía Morales Mendoza", "Camilo Rengifo Ortiz", "Manuel Palacio"],
-    commonPoints: ["La Imagen", "Lo Interactivo", "El Sonido & La Música", "Territorio & Memoria"],
-    individualIdea: "Lucía parte de la ilustración botánica y mapas familiares; Camilo parte del código sonoro en p5.js y sensores; Manuel asesora la arquitectura de cruce.",
-    collectiveIntersection: "Unir el mapa impreso con una interfaz web sonora que reproduce los rumores del agua según la interacción del espectador.",
-    milestone: "Primer prototipo híbrido: 3 láminas ilustradas digitalizadas conectadas a un oscilador web reactivo.",
-    status: "prototipo",
-    mediaUrl: "https://lab-colores.vercel.app/",
-    createdAt: "2026-10-24T10:15:00.000Z"
-  },
-  {
-    id: "adv-3",
-    type: "individual",
-    title: "Microcápsula Audiovisual: Voces del mercado en stop-motion",
-    authors: ["Lucía Morales Mendoza"],
-    commonPoints: ["El Video & Movimiento", "La Imagen"],
-    individualIdea: "Crear una cápsula de 30 segundos usando fotografías de objetos del mercado intervenidas con tinta.",
-    milestone: "Storyboard de 6 escenas listo y prueba de animación cuadro a cuadro de 12 fotogramas.",
-    status: "boceto",
-    mediaUrl: "https://lab-colores.vercel.app/",
-    createdAt: "2026-10-24T10:30:00.000Z"
   }
 ];
 
@@ -663,3 +600,15 @@ export const WORKSHOP_THEMATIC_AXES: WorkshopThematicAxis[] = [
   }
 ];
 
+export interface SparkNotification {
+  id: string;
+  advanceId: string | number;
+  title: string;
+  advanceTitle: string;
+  authors: string[];
+  categories: string[];
+  spark: CreativeSpark;
+  createdAt: string;
+  read: boolean;
+  previewPrompt: string;
+}

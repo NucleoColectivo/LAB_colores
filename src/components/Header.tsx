@@ -1,17 +1,21 @@
 import React from 'react';
-import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle } from 'lucide-react';
+import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle, Bell, Zap } from 'lucide-react';
 import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
 interface HeaderProps {
   onOpenProjector: () => void;
   onOpenWelcome: () => void;
+  onOpenNotifications: () => void;
   contributionCount: number;
+  unreadNotificationCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenProjector,
   onOpenWelcome,
-  contributionCount
+  onOpenNotifications,
+  contributionCount,
+  unreadNotificationCount
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#111111] text-white border-b-4 border-[#f8c300] px-4 sm:px-8 py-3 transition-all shadow-md">
@@ -33,6 +37,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mobile controls */}
           <div className="flex items-center gap-1.5 md:hidden">
+            <button
+              onClick={onOpenNotifications}
+              className="relative p-1.5 bg-stone-800 text-[#f8c300] rounded-full text-xs font-bold"
+              title="Notificaciones de prompts creativos"
+              aria-label="Ver avisos de prompts"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadNotificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-[#111111]">
+                  {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={onOpenWelcome}
               className="p-1.5 bg-stone-800 text-[#f8c300] rounded-full text-xs font-bold"
@@ -118,6 +135,22 @@ export const Header: React.FC<HeaderProps> = ({
             <Layers className="w-3.5 h-3.5 text-[#f8c300]" />
             <span>Avances & Repositorio</span>
           </a>
+
+          {/* Desktop Notification Center button */}
+          <button
+            onClick={onOpenNotifications}
+            className="relative px-2.5 py-1.5 rounded-lg text-stone-200 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 font-bold cursor-pointer"
+            title="Avisos de sugerencias de prompt para la mesa de trabajo"
+          >
+            <Bell className={`w-3.5 h-3.5 ${unreadNotificationCount > 0 ? 'text-[#f8c300] animate-pulse' : 'text-stone-300'}`} />
+            <span>Prompts 15min</span>
+            {unreadNotificationCount > 0 ? (
+              <span className="bg-[#f8c300] text-[#111111] text-[10px] font-black px-1.5 py-0.2 rounded-full shadow-xs">
+                {unreadNotificationCount}
+              </span>
+            ) : null}
+          </button>
+
           <a
             href="#conexion"
             className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1"
