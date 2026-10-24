@@ -90,12 +90,14 @@ interface IntentionAssistantProps {
   currentProject: CreativeProject;
   onApplyFichaToProject: (ficha: FichaProyecto) => void;
   onOpenTool?: (toolId: CreativeToolId) => void;
+  onActiveFichaChange?: (ficha: FichaProyecto) => void;
 }
 
 export const IntentionAssistant: React.FC<IntentionAssistantProps> = ({
   currentProject,
   onApplyFichaToProject,
-  onOpenTool
+  onOpenTool,
+  onActiveFichaChange
 }) => {
   // Load saved fichas from dedicated localStorage key
   const [fichas, setFichas] = useState<FichaProyecto[]>(() => {
@@ -128,6 +130,10 @@ export const IntentionAssistant: React.FC<IntentionAssistantProps> = ({
     try {
       localStorage.setItem(ACTIVE_FICHA_ID_KEY, id);
     } catch {}
+    const found = fichas.find((f) => f.id === id);
+    if (found && onActiveFichaChange) {
+      onActiveFichaChange(found);
+    }
   };
 
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -150,17 +156,23 @@ export const IntentionAssistant: React.FC<IntentionAssistantProps> = ({
 
   // Update a single field in the active ficha
   const handleUpdateField = <K extends keyof FichaProyecto>(field: K, value: FichaProyecto[K]) => {
+    let updatedActive: FichaProyecto | null = null;
     const updated = fichas.map((f) => {
       if (f.id === activeFicha.id) {
-        return {
+        const item = {
           ...f,
           [field]: value,
           updatedAt: new Date().toISOString()
         };
+        updatedActive = item;
+        return item;
       }
       return f;
     });
     persistFichas(updated);
+    if (updatedActive && onActiveFichaChange) {
+      onActiveFichaChange(updatedActive);
+    }
     setIsSavedFeedback(true);
     setTimeout(() => setIsSavedFeedback(false), 1200);
   };

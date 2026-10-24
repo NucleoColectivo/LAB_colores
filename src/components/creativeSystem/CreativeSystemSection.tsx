@@ -601,6 +601,31 @@ export const CreativeSystemSection: React.FC<CreativeSystemSectionProps> = ({
             currentProject={project}
             onApplyFichaToProject={handleApplyFichaToProject}
             onOpenTool={handleOpenTool}
+            onActiveFichaChange={(ficha) => {
+              const newEstado = ficha.estado || 'exploracion';
+              setEstadoFicha(newEstado);
+              const stageMap: Record<EstadoFicha, 'comprender' | 'producir' | 'conectar'> = {
+                exploracion: 'comprender',
+                produccion: 'producir',
+                integracion: 'conectar'
+              };
+              const updated: CreativeProject = {
+                ...project,
+                title: ficha.title || project.title,
+                author: ficha.author || project.author,
+                intention: ficha.intention || project.intention,
+                guidingQuestion: ficha.guidingQuestion || project.guidingQuestion,
+                context: ficha.context || project.context,
+                targetAudience: ficha.targetAudience || project.targetAudience,
+                resources: ficha.resources || project.resources,
+                desiredResult: ficha.desiredResult || project.desiredResult,
+                fichaStatus: newEstado,
+                activeStage: stageMap[newEstado] || project.activeStage,
+                activeTools: Array.from(new Set([...project.activeTools, ...(ficha.recommendedTools || [])])),
+                updatedAt: new Date().toISOString()
+              };
+              saveProject(updated);
+            }}
           />
         )}
 
