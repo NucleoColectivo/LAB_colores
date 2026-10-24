@@ -49,6 +49,41 @@ export interface WorkshopAdvance {
   createdAt: string;
 }
 
+export interface CreativeSpark {
+  sparkTitle: string;
+  thematicBridge: string;
+  fifteenMinPlan: {
+    min0to5: string;
+    min5to10: string;
+    min10to15: string;
+  };
+  runway: {
+    prompt: string;
+    cameraMotion: string;
+    tips: string;
+  };
+  midjourney: {
+    prompt: string;
+    aspectRatio: string;
+    styleTips: string;
+  };
+  p5js: {
+    title: string;
+    code: string;
+    interactionHint: string;
+  };
+}
+
+export interface ThemeGroup {
+  id: string;
+  title: string;
+  shortDesc: string;
+  iconName: string;
+  color: string;
+  keywords: string[];
+  suggestedCommonPoints: string[];
+}
+
 export interface CommonPointCategory {
   id: string;
   name: string;
@@ -511,6 +546,120 @@ export const INITIAL_SEED_ADVANCES: WorkshopAdvance[] = [
     status: "boceto",
     mediaUrl: "https://lab-colores.vercel.app/",
     createdAt: "2026-10-24T10:30:00.000Z"
+  }
+];
+
+export interface WorkshopThematicAxis {
+  id: string;
+  name: string;
+  iconName: string;
+  color: string;
+  shortDesc: string;
+  runwayKeyword: string;
+  midjourneyStyle: string;
+  p5Concept: string;
+}
+
+export const WORKSHOP_THEMATIC_AXES: WorkshopThematicAxis[] = [
+  {
+    id: "imagen",
+    name: "Imagen",
+    iconName: "Palette",
+    color: "#ff4fa3",
+    shortDesc: "Ilustración, grabado, diseño, collage, pintura y dibujo",
+    runwayKeyword: "high visual contrast, textured botanical and archival illustrations, hand-crafted details",
+    midjourneyStyle: "contemporary Risograph art and mixed-media collage, rich earthy pigments, detailed organic linework --ar 16:9 --v 6.1",
+    p5Concept: "canvas generativo con texturas de dibujo y paletas de color mutables"
+  },
+  {
+    id: "interactivo",
+    name: "Interactivo",
+    iconName: "HandMetal",
+    color: "#059669",
+    shortDesc: "Instalaciones táctiles, sensores, interfaces vivas y participación",
+    runwayKeyword: "dynamic interactive light projections reacting to human gestures, glowing tactile sensors",
+    midjourneyStyle: "interactive public art installation, responsive bioluminescent lighting, people touching glowing panels in dark gallery space --ar 16:9",
+    p5Concept: "interfaz interactiva sensible a la posición del mouse y clics del público"
+  },
+  {
+    id: "video",
+    name: "Video",
+    iconName: "Video",
+    color: "#e11d48",
+    shortDesc: "Cine, microdocumental, tomas vivas y narrativas en movimiento",
+    runwayKeyword: "cinematic handheld 35mm film shot, slow smooth tracking shot through neighborhood streets at golden hour, nostalgic warmth",
+    midjourneyStyle: "cinematography still from independent Latin American documentary, 35mm film grain, natural rim lighting, emotional street portrait --ar 16:9",
+    p5Concept: "reproductor de secuencias temporales con filtros cromáticos dinámicos"
+  },
+  {
+    id: "animacion-video",
+    name: "Animación de video",
+    iconName: "Film",
+    color: "#0891b2",
+    shortDesc: "Stop-motion, 2D/3D, motion graphics y animación cuadro a cuadro",
+    runwayKeyword: "tactile claymation and cut-out stop-motion animation coming to life, fluid rhythmic transformation",
+    midjourneyStyle: "tactile stop-motion paper craft animation frame, visible textures of cardboard, fabric, and hand-cut silhouette characters --ar 16:9",
+    p5Concept: "animación cuadro a cuadro por bucles matemáticos y deformación de vectores"
+  },
+  {
+    id: "lenguaje-audiovisual",
+    name: "Lenguaje audiovisual",
+    iconName: "Camera",
+    color: "#7656ff",
+    shortDesc: "Montaje, plano secuencia, ritmo, voz en off y sincronía sonora",
+    runwayKeyword: "atmospheric slow motion visual poem, dynamic editing pacing, atmospheric smoke and shadow play",
+    midjourneyStyle: "experimental film still, split-screen collage of memory and territory, dreamlike cinematic composition, chiaroscuro --ar 16:9",
+    p5Concept: "modulador visual de ritmo con ondas y frecuencias que bailan al compás"
+  },
+  {
+    id: "programacion-creativa",
+    name: "Programación creativa",
+    iconName: "Code2",
+    color: "#0284c7",
+    shortDesc: "p5.js, algoritmos generativos, visuales de código y shaders",
+    runwayKeyword: "generative mathematical algorithms evolving in real time, glowing vector lines and organic particle constellations",
+    midjourneyStyle: "generative code art visualization, complex vector mesh floating in volumetric space, glowing cyan and violet nodes --ar 16:9",
+    p5Concept: "sistema de partículas orgánicas que orbitan y reaccionan con física interactiva"
+  },
+  {
+    id: "textil",
+    name: "Textil",
+    iconName: "Scissors",
+    color: "#db2777",
+    shortDesc: "Bordado, costura comunitaria, fibras naturales y tapices vivos",
+    runwayKeyword: "extreme macro slow pan over colorful embroidered cotton threads, woven yarn landscapes and tactile stitches",
+    midjourneyStyle: "intricate community embroidered tapestry, natural dyed wool threads, indigenous and contemporary motifs intertwined, textile relief --ar 16:9",
+    p5Concept: "patrón generativo de telar y tejido digital con hilos entrelazados"
+  },
+  {
+    id: "performance",
+    name: "Performance",
+    iconName: "Activity",
+    color: "#ca8a04",
+    shortDesc: "Cuerpo como territorio, artes vivas y presencia en el espacio público",
+    runwayKeyword: "expressive contemporary dancer performing in an urban plaza, trailing ribbons of projected light and shadow, cinematic depth",
+    midjourneyStyle: "powerful live performance art in public square, expressive body movement interacting with projected shadows and earth pigments --ar 16:9",
+    p5Concept: "trazado de movimiento gestual que dibuja estelas de luz según el cursor"
+  },
+  {
+    id: "ecologia",
+    name: "Ecología",
+    iconName: "Leaf",
+    color: "#15803d",
+    shortDesc: "Bioarte, plantas, agua, ríos, huertos y ciencia ciudadana",
+    runwayKeyword: "time-lapse of river water flowing through lush native moss and riparian vegetation, glistening dew droplets, cinematic macro",
+    midjourneyStyle: "speculative bio-art installation, living moss and mycelium circuits connected to water droplets, lush green and amber tones, photorealistic --ar 16:9",
+    p5Concept: "simulación biológica de crecimiento vegetal y flujo de corrientes de agua"
+  },
+  {
+    id: "pedagogia",
+    name: "Pedagogía",
+    iconName: "GraduationCap",
+    color: "#b45309",
+    shortDesc: "Educación popular, saberes tradicionales, mediación y círculo",
+    runwayKeyword: "warm circular community workshop, hands sharing tools, drawings and ancestral stories around a wooden table, soft morning sun",
+    midjourneyStyle: "intergenerational popular education circle, people of different ages collaborating over a large illustrated mural, communal warmth, documentary photograph --ar 16:9",
+    p5Concept: "círculo participativo de intercambio de palabras e ideas que convergen al centro"
   }
 ];
 

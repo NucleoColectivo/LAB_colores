@@ -2,21 +2,29 @@ import React, { useState, useMemo } from 'react';
 import {
   WorkshopAdvance,
   ParticipantContribution,
-  COMMON_POINTS,
+  WORKSHOP_THEMATIC_AXES,
+  WorkshopThematicAxis,
+  CreativeSpark,
   OFFICIAL_WORKSHOP_URL,
   FACILITATOR_NAME,
   FACILITATOR_PHONE,
   FACILITATOR_WA_NUMBER
 } from '../types';
+import { generateCreativeSpark } from '../utils/sparkGenerator';
+import { SparkModal } from './SparkModal';
 import {
   Sparkles,
   Users,
   Palette,
   HandMetal,
   Video,
-  Cpu,
-  Volume2,
-  MapPin,
+  Film,
+  Camera,
+  Code2,
+  Scissors,
+  Activity,
+  Leaf,
+  GraduationCap,
   ExternalLink,
   PlusCircle,
   FileText,
@@ -30,7 +38,8 @@ import {
   Layers,
   CheckCircle2,
   Clock,
-  Trash2
+  Trash2,
+  Zap
 } from 'lucide-react';
 
 interface CoCreationAdvancesProps {
@@ -48,16 +57,22 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   onDeleteAdvance,
   onRefresh
 }) => {
-  const [selectedCommonPoint, setSelectedCommonPoint] = useState<string>('todos');
+  const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [filterType, setFilterType] = useState<'todos' | 'individual' | 'colectivo'>('todos');
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  // Spark modal state
+  const [isSparkOpen, setIsSparkOpen] = useState(false);
+  const [currentSpark, setCurrentSpark] = useState<CreativeSpark | null>(null);
+  const [sparkSourceTitle, setSparkSourceTitle] = useState<string>('');
+  const [sparkSourceContext, setSparkSourceContext] = useState<string>('');
+
   // Form states
-  const [advanceType, setAdvanceType] = useState<'individual' | 'colectivo'>('individual');
+  const [advanceType, setAdvanceType] = useState<'individual' | 'colectivo'>('colectivo');
   const [title, setTitle] = useState('');
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>([]);
   const [customAuthor, setCustomAuthor] = useState('');
-  const [selectedPoints, setSelectedPoints] = useState<string[]>(['La Imagen']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Imagen', 'Interactivo']);
   const [individualIdea, setIndividualIdea] = useState('');
   const [collectiveIntersection, setCollectiveIntersection] = useState('');
   const [milestone, setMilestone] = useState('');
@@ -65,8 +80,8 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   const [mediaUrl, setMediaUrl] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Map icon component helper
-  const renderPointIcon = (iconName: string, className = 'w-4 h-4') => {
+  // Helper to render icon for the 10 thematic categories
+  const renderCategoryIcon = (iconName: string, className = 'w-4 h-4') => {
     switch (iconName) {
       case 'Palette':
         return <Palette className={className} />;
@@ -74,24 +89,36 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
         return <HandMetal className={className} />;
       case 'Video':
         return <Video className={className} />;
-      case 'Cpu':
-        return <Cpu className={className} />;
-      case 'Volume2':
-        return <Volume2 className={className} />;
-      case 'MapPin':
+      case 'Film':
+        return <Film className={className} />;
+      case 'Camera':
+        return <Camera className={className} />;
+      case 'Code2':
+        return <Code2 className={className} />;
+      case 'Scissors':
+        return <Scissors className={className} />;
+      case 'Activity':
+        return <Activity className={className} />;
+      case 'Leaf':
+        return <Leaf className={className} />;
+      case 'GraduationCap':
       default:
-        return <MapPin className={className} />;
+        return <GraduationCap className={className} />;
     }
   };
 
-  // Compute how many participants belong to each common point based on their selected languages
-  const commonPointStats = useMemo(() => {
-    return COMMON_POINTS.map((cp) => {
+  // Compute participant count per category
+  const categoryStats = useMemo(() => {
+    return WORKSHOP_THEMATIC_AXES.map((axis) => {
       const matchingParticipants = contributions.filter((c) =>
-        (c.languages || []).some((lang) => cp.relatedLanguages.includes(lang))
+        (c.languages || []).some(
+          (lang) =>
+            lang.toLowerCase().includes(axis.name.toLowerCase()) ||
+            axis.name.toLowerCase().includes(lang.toLowerCase())
+        )
       );
       return {
-        ...cp,
+        ...axis,
         count: matchingParticipants.length,
         participants: matchingParticipants
       };
@@ -102,26 +129,31 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   const filteredAdvances = useMemo(() => {
     return advances.filter((adv) => {
       const matchType = filterType === 'todos' || adv.type === filterType;
-      const matchPoint =
-        selectedCommonPoint === 'todos' ||
+      const matchCategory =
+        selectedCategory === 'todos' ||
         (adv.commonPoints || []).some(
-          (p) => p.toLowerCase() === selectedCommonPoint.toLowerCase()
+          (p) => p.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+                 selectedCategory.toLowerCase().includes(p.toLowerCase())
         );
-      return matchType && matchPoint;
+      return matchType && matchCategory;
     });
-  }, [advances, filterType, selectedCommonPoint]);
+  }, [advances, filterType, selectedCategory]);
 
-  // Participants who match the active common point filter
-  const activePointParticipants = useMemo(() => {
-    if (selectedCommonPoint === 'todos') return [];
-    const cp = COMMON_POINTS.find(
-      (p) => p.name.toLowerCase() === selectedCommonPoint.toLowerCase()
+  // Participants matching active category filter
+  const activeCategoryParticipants = useMemo(() => {
+    if (selectedCategory === 'todos') return [];
+    const axis = WORKSHOP_THEMATIC_AXES.find(
+      (a) => a.name.toLowerCase() === selectedCategory.toLowerCase()
     );
-    if (!cp) return [];
+    if (!axis) return [];
     return contributions.filter((c) =>
-      (c.languages || []).some((lang) => cp.relatedLanguages.includes(lang))
+      (c.languages || []).some(
+        (lang) =>
+          lang.toLowerCase().includes(axis.name.toLowerCase()) ||
+          axis.name.toLowerCase().includes(lang.toLowerCase())
+      )
     );
-  }, [contributions, selectedCommonPoint]);
+  }, [contributions, selectedCategory]);
 
   // Toggle author selection in form
   const toggleAuthor = (name: string) => {
@@ -130,20 +162,57 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
     );
   };
 
-  // Toggle point selection in form
-  const togglePoint = (pointName: string) => {
-    setSelectedPoints((prev) =>
-      prev.includes(pointName)
-        ? prev.filter((p) => p !== pointName)
-        : [...prev, pointName]
+  // Toggle category selection in form
+  const toggleCategory = (catName: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(catName)
+        ? prev.filter((p) => p !== catName)
+        : [...prev, catName]
     );
   };
 
-  // Handle Form Submission
+  // Trigger spark for a specific category
+  const triggerCategorySpark = (axis: WorkshopThematicAxis) => {
+    const participants = contributions.filter((c) =>
+      (c.languages || []).some((l) => l.toLowerCase().includes(axis.name.toLowerCase()))
+    );
+    const authorNames = participants.map((p) => p.name || p.alias);
+
+    const spark = generateCreativeSpark({
+      title: `Chispa de ${axis.name}`,
+      categories: [axis.name],
+      individualIdea: `Exploración creativa desde ${axis.name} y sus posibilidades técnicas.`,
+      collectiveIntersection: `Crear un prototipo de 15 minutos articulando ${axis.shortDesc}.`,
+      authors: authorNames
+    });
+
+    setCurrentSpark(spark);
+    setSparkSourceTitle(`Categoría: ${axis.name}`);
+    setSparkSourceContext(`${participants.length} participantes con afinidad en ${axis.name}`);
+    setIsSparkOpen(true);
+  };
+
+  // Trigger spark for an existing advance
+  const triggerAdvanceSpark = (adv: WorkshopAdvance) => {
+    const spark = generateCreativeSpark({
+      title: adv.title,
+      categories: adv.commonPoints || ['Imagen', 'Interactivo'],
+      individualIdea: adv.individualIdea,
+      collectiveIntersection: adv.collectiveIntersection,
+      authors: adv.authors
+    });
+
+    setCurrentSpark(spark);
+    setSparkSourceTitle(adv.title);
+    setSparkSourceContext(`Avance Colectivo de ${adv.authors.join(', ')}`);
+    setIsSparkOpen(true);
+  };
+
+  // Handle Form Submission with AUTOMATIC SPARK TRIGGER for collective advances
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      alert('Por favor asigna un título o nombre a este avance.');
+      alert('Por favor escribe un título para este avance.');
       return;
     }
 
@@ -151,18 +220,21 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
     if (customAuthor.trim() && !allAuthors.includes(customAuthor.trim())) {
       allAuthors.push(customAuthor.trim());
     }
-
     if (allAuthors.length === 0) {
       allAuthors.push(FACILITATOR_NAME);
     }
+
+    const finalCategories =
+      selectedCategories.length > 0 ? selectedCategories : ['Imagen', 'Interactivo'];
 
     const newAdvance: WorkshopAdvance = {
       id: `adv-${Date.now()}`,
       type: advanceType,
       title: title.trim(),
       authors: allAuthors,
-      commonPoints: selectedPoints.length > 0 ? selectedPoints : ['La Imagen'],
-      individualIdea: individualIdea.trim() || 'Exploración inicial a partir de intereses disciplinares.',
+      commonPoints: finalCategories,
+      individualIdea:
+        individualIdea.trim() || 'Inquietud disciplinar de partida planteada en el taller.',
       collectiveIntersection:
         advanceType === 'colectivo' ? collectiveIntersection.trim() : undefined,
       milestone: milestone.trim() || 'Avance documentado durante la sesión del laboratorio.',
@@ -172,6 +244,22 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
     };
 
     onAddAdvance(newAdvance);
+
+    // AUTOMATIC TRIGGER: If collective advance, open the 15-minute spark immediately!
+    if (advanceType === 'colectivo') {
+      const spark = generateCreativeSpark({
+        title: newAdvance.title,
+        categories: finalCategories,
+        individualIdea: newAdvance.individualIdea,
+        collectiveIntersection: newAdvance.collectiveIntersection,
+        authors: allAuthors
+      });
+
+      setCurrentSpark(spark);
+      setSparkSourceTitle(newAdvance.title);
+      setSparkSourceContext(`¡Avance Colectivo recién registrado!`);
+      setIsSparkOpen(true);
+    }
 
     // Reset Form
     setTitle('');
@@ -188,7 +276,7 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   const handleCopyAdvance = async (adv: WorkshopAdvance) => {
     const text = `✦ [${adv.type === 'colectivo' ? 'AVANCE COLECTIVO' : 'AVANCE INDIVIDUAL'}] ${adv.title}
 Creador(es): ${adv.authors.join(', ')}
-Puntos en común: ${adv.commonPoints.join(', ')}
+Categorías: ${adv.commonPoints.join(', ')}
 Idea individual de origen: ${adv.individualIdea}
 ${adv.collectiveIntersection ? `Punto de encuentro / Cruce: ${adv.collectiveIntersection}\n` : ''}Hito alcanzado: ${adv.milestone}
 Estado: ${adv.status.toUpperCase()}
@@ -218,20 +306,22 @@ Enlace / Repositorio: ${adv.mediaUrl || OFFICIAL_WORKSHOP_URL}`;
 
 ---
 
-## 1. Puntos en Común Detectados en el Taller
-${COMMON_POINTS.map((cp) => {
+## 1. Categorías y Ejes Temáticos del Taller
+${WORKSHOP_THEMATIC_AXES.map((axis) => {
   const match = contributions.filter((c) =>
-    (c.languages || []).some((l) => cp.relatedLanguages.includes(l))
+    (c.languages || []).some((l) => l.toLowerCase().includes(axis.name.toLowerCase()))
   );
-  return `### ✦ ${cp.name} (${match.length} creadores conectados)
-- **Descripción:** ${cp.description}
+  return `### ✦ ${axis.name} (${match.length} creadores conectados)
+- **Áreas:** ${axis.shortDesc}
 - **Creadores en este nodo:** ${match.map((m) => m.name || m.alias).join(', ') || 'Pendientes por sumar'}
+- **Prompt Runway sugerido:** ${axis.runwayKeyword}
+- **Estilo Midjourney:** ${axis.midjourneyStyle}
 `;
 }).join('\n')}
 
 ---
 
-## 2. Bitácora de Avances Colectivos (Alianzas y Puntos de Encuentro)
+## 2. Bitácora de Avances Colectivos (Alianzas y Cruces)
 ${
   advances.filter((a) => a.type === 'colectivo').length === 0
     ? '_Aún no se han consolidado avances colectivos._'
@@ -240,7 +330,7 @@ ${
         .map(
           (a, i) => `### 🤝 [Avance Colectivo ${i + 1}] ${a.title}
 - **Creadores:** ${a.authors.join(', ')}
-- **Puntos en Común:** ${a.commonPoints.join(' · ')}
+- **Categorías:** ${a.commonPoints.join(' · ')}
 - **Estado:** \`${a.status.toUpperCase()}\`
 - **Idea de partida:** ${a.individualIdea}
 - **Punto de Encuentro / Intersección:** ${a.collectiveIntersection || 'Convergencia metodológica'}
@@ -253,7 +343,7 @@ ${
 
 ---
 
-## 3. Bitácora de Avances Individuales (Desde la propia idea e interés)
+## 3. Bitácora de Avances Individuales
 ${
   advances.filter((a) => a.type === 'individual').length === 0
     ? '_Aún no se han registrado avances individuales._'
@@ -262,7 +352,7 @@ ${
         .map(
           (a, i) => `### 👤 [Avance Individual ${i + 1}] ${a.title}
 - **Autor/a:** ${a.authors.join(', ')}
-- **Puntos en Común:** ${a.commonPoints.join(' · ')}
+- **Categorías:** ${a.commonPoints.join(' · ')}
 - **Estado:** \`${a.status.toUpperCase()}\`
 - **Idea / Inquietud original:** ${a.individualIdea}
 - **Hito alcanzado hoy:** ${a.milestone}
@@ -304,7 +394,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
 
     const lines = advances.map((a, i) => {
       const badge = a.type === 'colectivo' ? '🤝 COLECTIVO' : '👤 INDIVIDUAL';
-      return `${i + 1}. *[${badge}] ${a.title}*\n- Autores: ${a.authors.join(', ')}\n- Puntos en común: ${a.commonPoints.join(', ')}\n- Hito: ${a.milestone}\n- Estado: ${a.status}`;
+      return `${i + 1}. *[${badge}] ${a.title}*\n- Autores: ${a.authors.join(', ')}\n- Categorías: ${a.commonPoints.join(', ')}\n- Hito: ${a.milestone}\n- Estado: ${a.status}`;
     });
 
     const msg = `*BITÁCORA DE AVANCES · TALLER NÚCLEO COLECTIVO*\nFacilitador: ${FACILITATOR_NAME} (${FACILITATOR_PHONE})\nWeb/Repositorio: ${OFFICIAL_WORKSHOP_URL}\nTotal avances logrados: ${advances.length}\n\n${lines.join('\n\n')}`;
@@ -318,13 +408,13 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
           <span className="text-xs font-black uppercase tracking-widest text-[#5e48d5]">
-            Paso 04 · Co-creación y Puntos de Encuentro
+            Paso 04 · Co-creación, Categorías y Chispas
           </span>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111]">
             04. Unir ideas y avances colectivos
           </h2>
           <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-2xl">
-            Cada participante parte de <strong>su propia idea e interés</strong>, pero encontramos puntos en común (la imagen, lo interactivo, el video...) para lograr <strong>avances individuales y colectivos</strong> que reflejamos en el repositorio vivo.
+            Cada participante parte de <strong>su propia idea e interés</strong>, organizados en 10 categorías clave. Al registrar un avance colectivo se activa automáticamente un <strong>disparador de prompt generativo (Runway, Midjourney o p5.js)</strong> como chispa para prototipar en los primeros 15 minutos.
           </p>
         </div>
 
@@ -364,7 +454,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
               </span>
             </div>
             <p className="text-xs text-stone-300 mt-0.5">
-              Aquí se integran las ideas individuales de cada creador con los avances colaborativos de la jornada.
+              Aquí se integran las ideas individuales de cada creador con los avances colaborativos y las chispas generativas.
             </p>
           </div>
         </div>
@@ -391,13 +481,163 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
         </div>
       </div>
 
-      {/* FORM TO ADD NEW ADVANCE (ACCORDION / MODAL) */}
+      {/* 10 EXPLICIT CATEGORIES WITH 15-MINUTE SPARK TRIGGERS */}
+      <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200 pb-4 mb-6">
+          <div>
+            <span className="text-xs font-black uppercase text-[#7656ff] flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-[#f8c300]" />
+              <span>Grupos por Categorías · Disparadores de Prototipado</span>
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-[#111111]">
+              Puntos en común entre intereses (10 Ejes del Taller)
+            </h3>
+          </div>
+          <p className="text-xs text-stone-500 max-w-md">
+            Haz clic en <strong>⚡ Chispa 15 min</strong> en cualquier categoría para generar prompts inmediatos para <strong>Runway, Midjourney y p5.js</strong>.
+          </p>
+        </div>
+
+        {/* 10 Categories Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {categoryStats.map((axis) => {
+            const isSelected = selectedCategory.toLowerCase() === axis.name.toLowerCase();
+            return (
+              <div
+                key={axis.id}
+                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between text-left group ${
+                  isSelected
+                    ? 'border-[#7656ff] bg-[#f5f2ff] ring-2 ring-[#7656ff]/30 shadow-xs'
+                    : 'border-[#dedbd3] bg-[#faf9f6] hover:bg-white hover:border-stone-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 shadow-2xs"
+                      style={{ backgroundColor: axis.color }}
+                    >
+                      {renderCategoryIcon(axis.iconName, 'w-4 h-4')}
+                    </div>
+                    <span className="text-[11px] font-mono font-black px-2 py-0.5 rounded-full bg-white text-stone-800 border border-stone-200">
+                      {axis.count} {axis.count === 1 ? 'creador' : 'creadores'}
+                    </span>
+                  </div>
+
+                  <strong className="text-sm font-black text-[#111111] block leading-tight">
+                    {axis.name}
+                  </strong>
+                  <p className="text-[11px] text-stone-500 line-clamp-2 mt-1 leading-snug">
+                    {axis.shortDesc}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-200/70 flex items-center justify-between gap-1 flex-wrap">
+                  <button
+                    onClick={() =>
+                      setSelectedCategory(isSelected ? 'todos' : axis.name)
+                    }
+                    className="text-[11px] font-bold text-stone-600 hover:text-stone-900 cursor-pointer"
+                  >
+                    {isSelected ? 'Ver todos' : 'Filtrar'}
+                  </button>
+
+                  <button
+                    onClick={() => triggerCategorySpark(axis)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] text-[10px] font-black rounded-lg transition shadow-2xs cursor-pointer active:scale-95"
+                    title={`Disparar chispa generativa para ${axis.name}`}
+                  >
+                    <Zap className="w-3 h-3 text-[#111111]" />
+                    <span>Chispa 15 min</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Selected Category Detail Box */}
+        {selectedCategory !== 'todos' && activeCategoryParticipants.length > 0 && (
+          <div className="mt-6 p-5 rounded-2xl bg-[#faf9f6] border border-stone-200">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-[#7656ff]">
+                  Categoría seleccionada:
+                </span>
+                <strong className="text-sm font-black text-[#111111]">
+                  {selectedCategory}
+                </strong>
+                <span className="px-2 py-0.5 rounded-full bg-white border border-stone-300 text-[11px] font-bold text-stone-700">
+                  {activeCategoryParticipants.length} creadores conectados
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedCategory('todos')}
+                className="text-xs text-stone-500 hover:text-stone-900 underline cursor-pointer"
+              >
+                Quitar filtro
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {activeCategoryParticipants.map((p) => (
+                <div
+                  key={p.id}
+                  className="p-3 bg-white rounded-xl border border-stone-200 shadow-2xs text-xs"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <strong className="font-black text-stone-900">
+                      {p.name || p.alias}
+                    </strong>
+                    <span className="text-[10px] text-stone-500 font-medium">
+                      {p.role}
+                    </span>
+                  </div>
+                  {p.wish ? (
+                    <p className="text-stone-600 italic text-[11px] leading-snug">
+                      "{p.wish}"
+                    </p>
+                  ) : (
+                    <p className="text-stone-400 text-[11px]">
+                      Interesado en {p.themes || 'exploración interdisciplinaria'}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-stone-200">
+              <span className="text-xs text-stone-600">
+                ¿Listos para co-crear un avance en torno a <strong>{selectedCategory}</strong>?
+              </span>
+              <button
+                onClick={() => {
+                  setAdvanceType('colectivo');
+                  setSelectedAuthors(
+                    activeCategoryParticipants.map((p) => p.name || p.alias)
+                  );
+                  setSelectedCategories([selectedCategory]);
+                  setTitle(`Cruce colaborativo en ${selectedCategory}`);
+                  setIsFormOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#7656ff] hover:bg-[#6847ea] text-white rounded-full text-xs font-black transition cursor-pointer shadow-xs"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Crear avance colectivo en {selectedCategory}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* FORM TO ADD NEW ADVANCE (WITH AUTOMATIC TRIGGER ON SAVE) */}
       {isFormOpen && (
         <div className="mb-8 p-6 sm:p-8 bg-white rounded-3xl border-2 border-[#7656ff] shadow-md animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between border-b border-stone-200 pb-4 mb-6">
             <div>
-              <span className="text-[11px] font-black uppercase tracking-wider text-[#7656ff]">
-                Registro de Bitácora Viva
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#7656ff] flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5 text-[#f8c300]" />
+                <span>Registro de Bitácora con Disparador Automático</span>
               </span>
               <h3 className="text-xl font-black text-[#111111]">
                 Registrar un avance en el taller
@@ -426,7 +666,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
-                🤝 Avance Colectivo
+                🤝 Avance Colectivo (Dispara Chispa ⚡)
               </button>
             </div>
           </div>
@@ -444,8 +684,8 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={
                   advanceType === 'individual'
-                    ? 'Ej.: Boceto de personajes animados para microvideo'
-                    : 'Ej.: Alianza Imagen + Código Sonoro: Fanzine reactivo del río'
+                    ? 'Ej.: Boceto de microvideo con archivo de memoria barrial'
+                    : 'Ej.: Alianza Imagen + Programación: Tapiz interactivo reactivo'
                 }
                 className="w-full px-4 py-2.5 border border-[#c9c5bc] focus:border-[#7656ff] focus:ring-2 focus:ring-[#7656ff]/20 rounded-xl text-sm text-[#111111] bg-stone-50/50 outline-none"
               />
@@ -487,27 +727,27 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
               />
             </div>
 
-            {/* Common points tags */}
+            {/* Categorías (Las 10 exactas separadas) */}
             <div>
               <label className="block text-xs font-black uppercase text-stone-700 mb-1">
-                Puntos en común que conecta este trabajo
+                Categorías que cruza este avance (elige las que apliquen)
               </label>
               <div className="flex flex-wrap gap-2">
-                {COMMON_POINTS.map((cp) => {
-                  const isSelected = selectedPoints.includes(cp.name);
+                {WORKSHOP_THEMATIC_AXES.map((axis) => {
+                  const isSelected = selectedCategories.includes(axis.name);
                   return (
                     <button
                       type="button"
-                      key={cp.id}
-                      onClick={() => togglePoint(cp.name)}
+                      key={axis.id}
+                      onClick={() => toggleCategory(axis.name)}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer border ${
                         isSelected
                           ? 'bg-[#eee9ff] text-[#5e48d5] border-[#7656ff] ring-1 ring-[#7656ff]'
                           : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
                       }`}
                     >
-                      {renderPointIcon(cp.iconName, 'w-3 h-3')}
-                      <span>{cp.name}</span>
+                      {renderCategoryIcon(axis.iconName, 'w-3.5 h-3.5')}
+                      <span>{axis.name}</span>
                     </button>
                   );
                 })}
@@ -540,7 +780,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                     required
                     value={collectiveIntersection}
                     onChange={(e) => setCollectiveIntersection(e.target.value)}
-                    placeholder="¿En qué punto convergieron las ideas y cómo se complementan?"
+                    placeholder="¿En qué punto convergieron las ideas y qué van a prototipar juntos?"
                     className="w-full px-3 py-2 border border-[#7656ff] focus:ring-2 focus:ring-[#7656ff]/20 rounded-xl text-xs text-stone-800 bg-[#f9f8ff] outline-none resize-none"
                   />
                 </div>
@@ -601,9 +841,14 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-[#111111] hover:bg-stone-800 text-white rounded-full text-xs font-black transition cursor-pointer shadow-sm active:scale-98"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#111111] hover:bg-stone-800 text-white rounded-full text-xs font-black transition cursor-pointer shadow-sm active:scale-98"
                 >
-                  Guardar y publicar avance
+                  <Zap className="w-3.5 h-3.5 text-[#f8c300]" />
+                  <span>
+                    {advanceType === 'colectivo'
+                      ? 'Guardar y disparar chispa ⚡'
+                      : 'Guardar avance'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -611,146 +856,11 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
         </div>
       )}
 
-      {/* COMMON POINTS MATRICES (THE BRIDGES) */}
-      <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200 pb-4 mb-6">
-          <div>
-            <span className="text-xs font-black uppercase text-[#7656ff]">
-              Intersecciones Detectadas
-            </span>
-            <h3 className="text-lg sm:text-xl font-black text-[#111111]">
-              Puntos en común entre las ideas del grupo
-            </h3>
-          </div>
-          <p className="text-xs text-stone-500 max-w-sm">
-            Haz clic en un eje para ver quiénes comparten este medio expresivo y qué ideas pueden cruzarse.
-          </p>
-        </div>
-
-        {/* Common Points Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {commonPointStats.map((cp) => {
-            const isSelected = selectedCommonPoint === cp.name;
-            return (
-              <button
-                key={cp.id}
-                onClick={() =>
-                  setSelectedCommonPoint(isSelected ? 'todos' : cp.name)
-                }
-                className={`p-3.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer group ${
-                  isSelected
-                    ? 'border-[#7656ff] bg-[#f5f2ff] ring-2 ring-[#7656ff]/30 shadow-xs'
-                    : 'border-[#dedbd3] bg-[#faf9f6] hover:bg-white'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-white"
-                      style={{ backgroundColor: cp.color }}
-                    >
-                      {renderPointIcon(cp.iconName, 'w-3.5 h-3.5')}
-                    </div>
-                    <span className="text-[11px] font-mono font-black px-1.5 py-0.5 rounded-full bg-white text-stone-800 border border-stone-200">
-                      {cp.count}
-                    </span>
-                  </div>
-                  <strong className="text-xs font-black text-[#111111] block leading-tight">
-                    {cp.name}
-                  </strong>
-                  <span className="text-[10px] text-stone-500 line-clamp-2 mt-1 leading-snug">
-                    {cp.description}
-                  </span>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-stone-200/60 text-[10px] font-bold text-[#5e48d5] flex items-center justify-between">
-                  <span>{isSelected ? 'Filtrando' : 'Ver cruces'}</span>
-                  <ArrowRight className="w-2.5 h-2.5" />
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected Common Point Detail Box */}
-        {selectedCommonPoint !== 'todos' && activePointParticipants.length > 0 && (
-          <div className="mt-6 p-5 rounded-2xl bg-[#faf9f6] border border-stone-200">
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-[#7656ff]">
-                  Punto de Convergencia:
-                </span>
-                <strong className="text-sm font-black text-[#111111]">
-                  {selectedCommonPoint}
-                </strong>
-                <span className="px-2 py-0.5 rounded-full bg-white border border-stone-300 text-[11px] font-bold text-stone-700">
-                  {activePointParticipants.length} creadores conectados
-                </span>
-              </div>
-              <button
-                onClick={() => setSelectedCommonPoint('todos')}
-                className="text-xs text-stone-500 hover:text-stone-900 underline cursor-pointer"
-              >
-                Quitar filtro
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {activePointParticipants.map((p) => (
-                <div
-                  key={p.id}
-                  className="p-3 bg-white rounded-xl border border-stone-200 shadow-2xs text-xs"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <strong className="font-black text-stone-900">
-                      {p.name || p.alias}
-                    </strong>
-                    <span className="text-[10px] text-stone-500 font-medium">
-                      {p.role}
-                    </span>
-                  </div>
-                  {p.wish ? (
-                    <p className="text-stone-600 italic text-[11px] leading-snug">
-                      "{p.wish}"
-                    </p>
-                  ) : (
-                    <p className="text-stone-400 text-[11px]">
-                      Interesado en {p.themes || 'exploración interdisciplinaria'}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-stone-200">
-              <span className="text-xs text-stone-600">
-                ¿Quieres generar un avance colaborativo con este grupo?
-              </span>
-              <button
-                onClick={() => {
-                  setAdvanceType('colectivo');
-                  setSelectedAuthors(
-                    activePointParticipants.map((p) => p.name || p.alias)
-                  );
-                  setSelectedPoints([selectedCommonPoint]);
-                  setTitle(`Cruce en torno a ${selectedCommonPoint}`);
-                  setIsFormOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#7656ff] hover:bg-[#6847ea] text-white rounded-full text-xs font-bold transition cursor-pointer"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Crear avance colaborativo con este punto en común</span>
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* ADVANCES WALL: INDIVIDUAL AND COLLECTIVE */}
       <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs">
         {/* Filter bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-4 mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setFilterType('todos')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-black transition cursor-pointer ${
@@ -885,7 +995,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                       </span>
                     </div>
 
-                    {/* Common Points Badges */}
+                    {/* Categories Badges */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
                       {(adv.commonPoints || []).map((cp) => (
                         <span
@@ -922,7 +1032,7 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                     )}
 
                     {/* Milestone achieved */}
-                    <div className="text-xs text-stone-800 mb-2 leading-relaxed">
+                    <div className="text-xs text-stone-800 mb-3 leading-relaxed">
                       <strong className="text-stone-900 font-bold block mb-0.5">
                         Hito alcanzado:
                       </strong>
@@ -930,30 +1040,42 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                     </div>
                   </div>
 
-                  {/* Footer with repo URL & date */}
+                  {/* Footer with repo URL & Spark button */}
                   <div className="pt-3 border-t border-stone-200/70 flex items-center justify-between flex-wrap gap-2 text-xs">
-                    {adv.mediaUrl ? (
-                      <a
-                        href={adv.mediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#5e48d5] hover:underline"
-                      >
-                        <span>Ver en repositorio</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ) : (
-                      <span className="text-[11px] text-stone-400">
-                        {OFFICIAL_WORKSHOP_URL}
-                      </span>
-                    )}
+                    {/* TRIGGER SPARK BUTTON FOR THIS ADVANCE */}
+                    <button
+                      onClick={() => triggerAdvanceSpark(adv)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-lg text-xs transition shadow-2xs cursor-pointer active:scale-95"
+                      title="Abrir chispa generativa para este avance (Runway / Midjourney / p5.js)"
+                    >
+                      <Zap className="w-3.5 h-3.5 text-[#111111]" />
+                      <span>Chispa 15 min ⚡</span>
+                    </button>
 
-                    <span className="text-[10px] text-stone-400 font-mono">
-                      {new Date(adv.createdAt).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      {adv.mediaUrl ? (
+                        <a
+                          href={adv.mediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#5e48d5] hover:underline"
+                        >
+                          <span>Repositorio</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-[11px] text-stone-400">
+                          {OFFICIAL_WORKSHOP_URL}
+                        </span>
+                      )}
+
+                      <span className="text-[10px] text-stone-400 font-mono">
+                        {new Date(adv.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -961,6 +1083,15 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
           </div>
         )}
       </div>
+
+      {/* SPARK MODAL (TRIGGERED AUTOMATICALLY OR ON DEMAND) */}
+      <SparkModal
+        isOpen={isSparkOpen}
+        onClose={() => setIsSparkOpen(false)}
+        spark={currentSpark}
+        sourceTitle={sparkSourceTitle}
+        sourceContext={sparkSourceContext}
+      />
     </section>
   );
 };

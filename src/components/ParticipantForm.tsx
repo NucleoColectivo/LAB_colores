@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CREATIVE_LANGUAGES, ParticipantContribution } from '../types';
+import React, { useState, useMemo } from 'react';
+import { CREATIVE_LANGUAGES, ParticipantContribution, LanguageDefinition } from '../types';
 import {
   Check,
   Send,
@@ -72,11 +72,32 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
   // Creative Data
   const [role, setRole] = useState('');
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<string>('Todos');
   const [themes, setThemes] = useState('');
   const [memory, setMemory] = useState('');
   const [wish, setWish] = useState('');
   const [resources, setResources] = useState('');
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean } | null>(null);
+
+  const CATEGORY_MAP: Record<string, string[]> = {
+    'Imagen': ['Imagen e ilustración'],
+    'Interactivo': ['Arte interactivo', 'Experiencias inmersivas'],
+    'Video': ['Video y audiovisual'],
+    'Animación de video': ['Animación y 3D'],
+    'Lenguaje audiovisual': ['Fotografía y memoria visual', 'Cómic y narrativas gráficas'],
+    'Programación creativa': ['Programación creativa', 'IA y experimentación'],
+    'Textil': ['Textil, bordado y materias vivas'],
+    'Performance': ['Performance y cuerpo'],
+    'Ecología': ['Ecología y ciencia ciudadana'],
+    'Pedagogía': ['Pedagogía y saberes tradicionales'],
+    'ETC': ['Sonido y música', 'Instalación y objetos', 'Cartografía y territorio', 'Futuros imaginados', 'Escritura, poesía y fanzine']
+  };
+
+  const filteredLanguages: LanguageDefinition[] = useMemo(() => {
+    if (activeCategoryFilter === 'Todos') return CREATIVE_LANGUAGES;
+    const allowed = CATEGORY_MAP[activeCategoryFilter] || [];
+    return CREATIVE_LANGUAGES.filter((l) => allowed.includes(l.name));
+  }, [activeCategoryFilter]);
 
   // Multidisciplinary selection without strict upper limit
   const toggleLanguage = (langName: string) => {
@@ -462,8 +483,47 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
               </div>
             </div>
 
+            {/* Categorías (Separación explícita según solicitud) */}
+            <div className="mb-3.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+                <span className="text-[11px] font-black uppercase text-stone-500 whitespace-nowrap mr-1">
+                  Categorías:
+                </span>
+                {[
+                  'Todos',
+                  'Imagen',
+                  'Interactivo',
+                  'Video',
+                  'Animación de video',
+                  'Lenguaje audiovisual',
+                  'Programación creativa',
+                  'Textil',
+                  'Performance',
+                  'Ecología',
+                  'Pedagogía',
+                  'ETC'
+                ].map((cat) => {
+                  const isActive = activeCategoryFilter === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setActiveCategoryFilter(cat)}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                        isActive
+                          ? 'bg-[#111111] text-[#f8c300] shadow-2xs ring-1 ring-stone-900'
+                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {CREATIVE_LANGUAGES.map((lang) => {
+              {filteredLanguages.map((lang) => {
                 const isChecked = selectedLanguages.includes(lang.name);
                 return (
                   <label
