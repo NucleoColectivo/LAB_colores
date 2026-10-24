@@ -117,6 +117,8 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
       'Organización / Colectivo',
       'Red Social',
       'Rol de afinidad',
+      'Autorización Tratamiento de Datos (Manuel Palacio / Núcleo)',
+      'Compartir Contacto en Directorio',
       'Lenguajes Creativos',
       'Temas y preguntas',
       'Memoria / Imagen',
@@ -135,6 +137,8 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
       c.organization || '',
       c.social || '',
       c.role || '',
+      c.dataConsent ? 'AUTORIZADO (Ley Habeas Data)' : 'NO AUTORIZADO',
+      c.shareContact ? 'SÍ' : 'NO',
       (c.languages || []).join(' | '),
       c.themes || '',
       c.memory || '',
@@ -261,7 +265,7 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
             {languageStats.length}
           </strong>
           <span className="text-[11px] text-stone-300 font-semibold mt-1 block">
-            de 12 disciplinas
+            de {CREATIVE_LANGUAGES.length} disciplinas
           </span>
         </div>
 

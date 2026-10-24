@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
-import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2, Globe, Users, ExternalLink } from 'lucide-react';
-import { OFFICIAL_WORKSHOP_URL } from '../types';
+import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2, Globe, Users, ExternalLink, QrCode, Smartphone } from 'lucide-react';
+import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
 interface HeroProps {
   onScrollToForm: () => void;
+  onScrollToQr: () => void;
   onScrollToMap: () => void;
   onScrollToNetwork: () => void;
+  onScrollToCoCreation?: () => void;
+  onOpenWelcome: () => void;
   totalContributions: number;
 }
 
 export const Hero: React.FC<HeroProps> = ({
   onScrollToForm,
+  onScrollToQr,
   onScrollToMap,
   onScrollToNetwork,
+  onScrollToCoCreation,
+  onOpenWelcome,
   totalContributions
 }) => {
   const [orbSymbols, setOrbSymbols] = useState(['✳', '◉', '✦']);
@@ -31,10 +37,14 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Left Column: Narrative & Action */}
         <div className="lg:col-span-7">
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eee9ff] text-[#5e48d5] text-xs font-black uppercase tracking-widest">
+            <button
+              onClick={onOpenWelcome}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eee9ff] hover:bg-[#ded4ff] text-[#5e48d5] text-xs font-black uppercase tracking-widest transition cursor-pointer"
+              title="Haz clic para ver la bienvenida general y los principios del laboratorio"
+            >
               <span className="w-2 h-2 rounded-full bg-[#7656ff] animate-ping" />
-              <span>Sesión 1 · Escuchar y enfocar</span>
-            </div>
+              <span>Sesión 1 · Bienvenida al Laboratorio ✦</span>
+            </button>
 
             <a
               href={OFFICIAL_WORKSHOP_URL}
@@ -53,7 +63,7 @@ export const Hero: React.FC<HeroProps> = ({
           </h1>
 
           <p className="text-base sm:text-lg text-[#45423d] leading-relaxed max-w-2xl mb-6">
-            Un espacio para compartir intereses, recuerdos, preguntas y posibilidades. Registra tu nombre y datos para conectar con la red de creadores y descubrir qué podemos crear juntos.
+            Un espacio para compartir intereses, recuerdos, preguntas y posibilidades. Escanea los códigos QR para ingresar desde tu celular, registrar tu nombre y conectar con la red de creadores.
           </p>
 
           {/* Metadata badges */}
@@ -72,17 +82,18 @@ export const Hero: React.FC<HeroProps> = ({
             </span>
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons: QRs FIRST, then form, then WhatsApp */}
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={onScrollToForm}
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-extrabold rounded-full text-sm sm:text-base transition transform active:scale-98 shadow-sm cursor-pointer"
+              onClick={onScrollToQr}
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-sm sm:text-base transition transform active:scale-98 shadow-sm cursor-pointer"
             >
-              <span>Registrarme y conectar</span>
-              <ArrowDown className="w-4 h-4" />
+              <Smartphone className="w-4 h-4" />
+              <span>Escanear QR y conectar ↓</span>
             </button>
+
             <a
-              href="https://chat.whatsapp.com/ErtCU75vz84H95zQ7Lj8rM"
+              href={OFFICIAL_WHATSAPP_GROUP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-3.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-full text-sm sm:text-base transition shadow-xs cursor-pointer"
@@ -90,13 +101,32 @@ export const Hero: React.FC<HeroProps> = ({
               <span>WhatsApp del taller</span>
               <ExternalLink className="w-4 h-4" />
             </a>
+
+            <button
+              onClick={onScrollToForm}
+              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-stone-100 hover:bg-stone-200 text-[#111111] border border-stone-300 font-bold rounded-full text-sm transition cursor-pointer"
+            >
+              <span>Llenar ficha aquí</span>
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+
             <button
               onClick={onScrollToNetwork}
-              className="inline-flex items-center gap-2 px-5 py-3.5 bg-white hover:bg-stone-100 text-[#111111] border border-[#dedbd3] font-bold rounded-full text-sm sm:text-base transition cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-3.5 bg-white hover:bg-stone-100 text-[#111111] border border-[#dedbd3] font-bold rounded-full text-sm transition cursor-pointer"
             >
               <Users className="w-4 h-4 text-[#7656ff]" />
               <span>Red ({totalContributions})</span>
             </button>
+
+            {onScrollToCoCreation && (
+              <button
+                onClick={onScrollToCoCreation}
+                className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-[#eee9ff] hover:bg-[#ded4ff] text-[#5e48d5] font-black rounded-full text-sm transition cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-[#7656ff]" />
+                <span>Unir ideas y avances ↓</span>
+              </button>
+            )}
           </div>
         </div>
 

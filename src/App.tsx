@@ -1,64 +1,157 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { WorkshopRoute } from './components/WorkshopRoute';
+import { ConnectionQR } from './components/ConnectionQR';
 import { ParticipantForm } from './components/ParticipantForm';
 import { CollectiveMap } from './components/CollectiveMap';
 import { UserNetwork } from './components/UserNetwork';
 import { CreativeCrosses } from './components/CreativeCrosses';
-import { ConnectionQR } from './components/ConnectionQR';
+import { CoCreationAdvances } from './components/CoCreationAdvances';
 import { ProjectorModal } from './components/ProjectorModal';
+import { WelcomeModal } from './components/WelcomeModal';
 import { Footer } from './components/Footer';
-import { ParticipantContribution, INITIAL_SEED_DATA } from './types';
+import {
+  ParticipantContribution,
+  INITIAL_SEED_DATA,
+  WorkshopAdvance,
+  INITIAL_SEED_ADVANCES
+} from './types';
 
 const STORAGE_KEY = 'nucleo-lab-aportes-v1';
+const ADVANCES_STORAGE_KEY = 'nucleo-lab-avances-v1';
+const WELCOME_SEEN_KEY = 'nucleo-lab-welcome-seen-v1';
 
 export default function App() {
-  const [contributions, setContributions] = useState<ParticipantContribution[]>([]);
+  const [contributions, setContributions] = useState<ParticipantContribution[]>(INITIAL_SEED_DATA);
+  const [advances, setAdvances] = useState<WorkshopAdvance[]>(INITIAL_SEED_ADVANCES);
   const [isProjectorOpen, setIsProjectorOpen] = useState(false);
+  const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const lastSyncCount = useRef<number>(0);
 
-  // Load from localStorage on mount
-  useEffect(() => {
+  // Fetch from server /api/contributions
+  const fetchContributionsFromServer = async () => {
+    try {
+      const res = await fetch('/api/contributions');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setContributions(data);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          } catch {}
+          lastSyncCount.current = data.length;
+          return;
+        }
+      }
+    } catch (e) {
+      // Fallback to localStorage
+    }
+
+    // LocalStorage fallback
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Normalize legacy entries if missing name/contact
-          const normalized = parsed.map((item) => ({
-            ...item,
-            name: item.name || item.alias || 'Participante',
-            email: item.email || '',
-            shareContact: item.shareContact ?? true
-          }));
-          setContributions(normalized);
+          setContributions(parsed);
           return;
         }
       }
-      // Seed initial sample data with realistic names and contacts
-      setContributions(INITIAL_SEED_DATA);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SEED_DATA));
-    } catch (e) {
-      console.error('Error loading contributions from localStorage:', e);
-      setContributions(INITIAL_SEED_DATA);
+    } catch {}
+
+    setContributions(INITIAL_SEED_DATA);
+  };
+
+  // Fetch from server /api/advances
+  const fetchAdvancesFromServer = async () => {
+    try {
+      const res = await fetch('/api/advances');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setAdvances(data);
+          try {
+            localStorage.setItem(ADVANCES_STORAGE_KEY, JSON.stringify(data));
+          } catch {}
+          return;
+        }
+      }
+    } catch {}
+
+    try {
+      const raw = localStorage.getItem(ADVANCES_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAdvances(parsed);
+          return;
+        }
+      }
+    } catch {}
+
+    setAdvances(INITIAL_SEED_ADVANCES);
+  };
+
+  // Initial load and real-time polling every 3.5 seconds
+  useEffect(() => {
+    fetchContributionsFromServer();
+    fetchAdvancesFromServer();
+
+    const welcomeSeen = localStorage.getItem(WELCOME_SEEN_KEY);
+    if (!welcomeSeen) {
+      setIsWelcomeOpen(true);
     }
+
+    // Polling interval for live multi-device synchronization
+    const interval = setInterval(() => {
+      fetchContributionsFromServer();
+      fetchAdvancesFromServer();
+    }, 3500);
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Save changes to localStorage
-  const saveContributions = (data: ParticipantContribution[]) => {
+  const handleCloseWelcome = () => {
+    setIsWelcomeOpen(false);
+    try {
+      localStorage.setItem(WELCOME_SEEN_KEY, 'true');
+    } catch {}
+  };
+
+  // Save changes locally and to backend server
+  const saveContributions = async (data: ParticipantContribution[], newRecord?: ParticipantContribution) => {
     setContributions(data);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.error('Error saving contributions:', e);
+    } catch {}
+
+    if (newRecord) {
+      setIsSyncing(true);
+      try {
+        await fetch('/api/contributions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRecord),
+        });
+      } catch (err) {
+        console.error('Error syncing to server:', err);
+      } finally {
+        setIsSyncing(false);
+      }
     }
   };
 
-  const handleSubmitContribution = (newRecord: ParticipantContribution) => {
-    const updated = [...contributions, newRecord];
-    saveContributions(updated);
+  const handleSubmitContribution = async (newRecord: ParticipantContribution) => {
+    // Check if duplicate ID exists, otherwise append
+    const exists = contributions.some((c) => String(c.id) === String(newRecord.id));
+    const updated = exists
+      ? contributions.map((c) => (String(c.id) === String(newRecord.id) ? newRecord : c))
+      : [newRecord, ...contributions];
 
-    // Smooth scroll down to Community Network / Map so the participant sees themselves
+    await saveContributions(updated, newRecord);
+
     const networkSection = document.getElementById('comunidad');
     if (networkSection) {
       setTimeout(() => {
@@ -67,43 +160,87 @@ export default function App() {
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (
       window.confirm(
-        '¿Deseas borrar los aportes y participantes guardados en este navegador? Esta acción no se puede deshacer.'
+        '¿Deseas borrar los aportes y participantes guardados en este navegador y en el servidor? Esta acción no se puede deshacer.'
       )
     ) {
+      try {
+        await fetch('/api/contributions', { method: 'DELETE' });
+      } catch {}
       saveContributions([]);
     }
   };
 
-  const handleLoadSeedData = () => {
+  const handleLoadSeedData = async () => {
+    for (const item of INITIAL_SEED_DATA) {
+      try {
+        await fetch('/api/contributions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+      } catch {}
+    }
     saveContributions(INITIAL_SEED_DATA);
   };
 
-  const handleImportJson = (imported: ParticipantContribution[]) => {
+  const handleImportJson = async (imported: ParticipantContribution[]) => {
     const existingIds = new Set(contributions.map((c) => String(c.id)));
-    const filteredNew = imported
-      .filter((item) => !existingIds.has(String(item.id)))
-      .map((item) => ({
-        ...item,
-        name: item.name || item.alias || 'Participante',
-        email: item.email || '',
-        shareContact: item.shareContact ?? true
-      }));
+    const filteredNew = imported.filter((item) => !existingIds.has(String(item.id)));
+    for (const item of filteredNew) {
+      try {
+        await fetch('/api/contributions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+      } catch {}
+    }
+    saveContributions([...filteredNew, ...contributions]);
+  };
 
-    saveContributions([...contributions, ...filteredNew]);
+  const handleAddAdvance = async (newAdvance: WorkshopAdvance) => {
+    const updated = [newAdvance, ...advances.filter((a) => String(a.id) !== String(newAdvance.id))];
+    setAdvances(updated);
+    try {
+      localStorage.setItem(ADVANCES_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+
+    try {
+      await fetch('/api/advances', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAdvance),
+      });
+    } catch (e) {
+      console.error('Error saving advance to server:', e);
+    }
+  };
+
+  const handleDeleteAdvance = async (id: string | number) => {
+    const updated = advances.filter((a) => String(a.id) !== String(id));
+    setAdvances(updated);
+    try {
+      localStorage.setItem(ADVANCES_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+
+    try {
+      await fetch(`/api/advances/${id}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error('Error deleting advance on server:', e);
+    }
   };
 
   const handleRefresh = () => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        setContributions(JSON.parse(raw));
-      }
-    } catch (e) {
-      // ignore
-    }
+    fetchContributionsFromServer();
+    fetchAdvancesFromServer();
+  };
+
+  const scrollToQr = () => {
+    const el = document.getElementById('conexion');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToForm = () => {
@@ -121,25 +258,41 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToCoCreation = () => {
+    const el = document.getElementById('co-creacion');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f3ee] text-[#111111]">
       <Header
         onOpenProjector={() => setIsProjectorOpen(true)}
+        onOpenWelcome={() => setIsWelcomeOpen(true)}
         contributionCount={contributions.length}
       />
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 space-y-4">
+        {/* HERO SECTION */}
         <Hero
           onScrollToForm={scrollToForm}
+          onScrollToQr={scrollToQr}
           onScrollToMap={scrollToMap}
           onScrollToNetwork={scrollToNetwork}
+          onScrollToCoCreation={scrollToCoCreation}
+          onOpenWelcome={() => setIsWelcomeOpen(true)}
           totalContributions={contributions.length}
         />
 
+        {/* METODOLOGÍA VIVA: RUTA DE LA MAÑANA */}
         <WorkshopRoute />
 
+        {/* 00. ESCANEA PARA INICIAR: LOS QR ANTES DE LOS DATOS */}
+        <ConnectionQR onScrollToForm={scrollToForm} />
+
+        {/* 01. REGISTRO Y AFINIDADES: FICHA CON DATOS Y LENGUAJES */}
         <ParticipantForm onSubmit={handleSubmitContribution} />
 
+        {/* 02. MAPA COLECTIVO DE AFINIDADES */}
         <CollectiveMap
           contributions={contributions}
           onRefresh={handleRefresh}
@@ -148,11 +301,20 @@ export default function App() {
           onLoadSeedData={handleLoadSeedData}
         />
 
+        {/* 03. RED DE CREADORES DEL TALLER (DIRECTORIO DE PARTICIPANTES) */}
         <UserNetwork contributions={contributions} />
 
+        {/* 04. CRUCES PARA IMAGINAR (LABORATORIO DE CRUCES CREATIVOS) */}
         <CreativeCrosses contributions={contributions} />
 
-        <ConnectionQR />
+        {/* 05. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
+        <CoCreationAdvances
+          contributions={contributions}
+          advances={advances}
+          onAddAdvance={handleAddAdvance}
+          onDeleteAdvance={handleDeleteAdvance}
+          onRefresh={fetchAdvancesFromServer}
+        />
       </main>
 
       <Footer />
@@ -161,6 +323,12 @@ export default function App() {
         isOpen={isProjectorOpen}
         onClose={() => setIsProjectorOpen(false)}
         contributions={contributions}
+      />
+
+      <WelcomeModal
+        isOpen={isWelcomeOpen}
+        onClose={handleCloseWelcome}
+        onStartParticipation={scrollToForm}
       />
     </div>
   );

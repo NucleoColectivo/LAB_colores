@@ -1,13 +1,18 @@
 import React from 'react';
-import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle } from 'lucide-react';
+import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle } from 'lucide-react';
 import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
 interface HeaderProps {
   onOpenProjector: () => void;
+  onOpenWelcome: () => void;
   contributionCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenProjector, contributionCount }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onOpenProjector,
+  onOpenWelcome,
+  contributionCount
+}) => {
   return (
     <header className="sticky top-0 z-40 bg-[#111111] text-white border-b-4 border-[#f8c300] px-4 sm:px-8 py-3 transition-all shadow-md">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -28,6 +33,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProjector, contributionCou
 
           {/* Mobile controls */}
           <div className="flex items-center gap-1.5 md:hidden">
+            <button
+              onClick={onOpenWelcome}
+              className="p-1.5 bg-stone-800 text-[#f8c300] rounded-full text-xs font-bold"
+              title="Bienvenida e introducción"
+              aria-label="Bienvenida al laboratorio"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
             <a
               href={OFFICIAL_WHATSAPP_GROUP_URL}
               target="_blank"
@@ -50,6 +63,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProjector, contributionCou
         </div>
 
         <nav aria-label="Navegación principal" className="flex items-center gap-1 sm:gap-1.5 flex-wrap text-xs sm:text-sm">
+          <button
+            onClick={onOpenWelcome}
+            className="px-2.5 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold cursor-pointer"
+            title="Ver bienvenida general y principios del laboratorio"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Bienvenida</span>
+          </button>
           <a
             href="#ruta"
             className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1"
@@ -89,6 +110,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProjector, contributionCou
           >
             <Sparkles className="w-3.5 h-3.5 text-[#f8c300]" />
             <span>Cruces</span>
+          </a>
+          <a
+            href="#co-creacion"
+            className="px-2 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#f8c300]" />
+            <span>Avances & Repositorio</span>
           </a>
           <a
             href="#conexion"

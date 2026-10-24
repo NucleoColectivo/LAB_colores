@@ -1,0 +1,59 @@
+[
+  {
+    "id": "adv-1",
+    "type": "individual",
+    "title": "Oráculo Interactivo: Modelado de prompts con memorias comunitarias",
+    "authors": [
+      "Manuel Palacio"
+    ],
+    "commonPoints": [
+      "Inteligencia Artificial",
+      "Lo Interactivo",
+      "La Imagen"
+    ],
+    "individualIdea": "Explorar cómo la IA puede actuar como un espejo sensible de las memorias de un territorio sin despojarlo de su identidad.",
+    "milestone": "Estructuración de prompt y flujo en servidor para condensar relatos orales en imágenes y preguntas generadoras.",
+    "status": "prototipo",
+    "mediaUrl": "https://lab-colores.vercel.app/",
+    "createdAt": "2026-10-24T09:45:00.000Z"
+  },
+  {
+    "id": "adv-2",
+    "type": "colectivo",
+    "title": "Alianza Imagen + Código Sonoro: Fanzine reactivo del río",
+    "authors": [
+      "Lucía Morales Mendoza",
+      "Camilo Rengifo Ortiz",
+      "Manuel Palacio"
+    ],
+    "commonPoints": [
+      "La Imagen",
+      "Lo Interactivo",
+      "El Sonido & La Música",
+      "Territorio & Memoria"
+    ],
+    "individualIdea": "Lucía parte de la ilustración botánica y mapas familiares; Camilo parte del código sonoro en p5.js y sensores; Manuel asesora la arquitectura de cruce.",
+    "collectiveIntersection": "Unir el mapa impreso con una interfaz web sonora que reproduce los rumores del agua según la interacción del espectador.",
+    "milestone": "Primer prototipo híbrido: 3 láminas ilustradas digitalizadas conectadas a un oscilador web reactivo.",
+    "status": "prototipo",
+    "mediaUrl": "https://lab-colores.vercel.app/",
+    "createdAt": "2026-10-24T10:15:00.000Z"
+  },
+  {
+    "id": "adv-3",
+    "type": "individual",
+    "title": "Microcápsula Audiovisual: Voces del mercado en stop-motion",
+    "authors": [
+      "Lucía Morales Mendoza"
+    ],
+    "commonPoints": [
+      "El Video & Movimiento",
+      "La Imagen"
+    ],
+    "individualIdea": "Crear una cápsula de 30 segundos usando fotografías de objetos del mercado intervenidas con tinta.",
+    "milestone": "Storyboard de 6 escenas listo y prueba de animación cuadro a cuadro de 12 fotogramas.",
+    "status": "boceto",
+    "mediaUrl": "https://lab-colores.vercel.app/",
+    "createdAt": "2026-10-24T10:30:00.000Z"
+  }
+]

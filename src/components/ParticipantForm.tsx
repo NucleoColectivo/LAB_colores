@@ -21,7 +21,14 @@ import {
   Cpu,
   Box,
   Compass,
-  Globe
+  Globe,
+  MessageCircle,
+  Scissors,
+  PenTool,
+  Film,
+  Activity,
+  Leaf,
+  GraduationCap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -41,7 +48,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Cpu: <Cpu className="w-4 h-4" />,
   Box: <Box className="w-4 h-4" />,
   MapPin: <MapPin className="w-4 h-4" />,
-  Compass: <Compass className="w-4 h-4" />
+  Compass: <Compass className="w-4 h-4" />,
+  Scissors: <Scissors className="w-4 h-4" />,
+  PenTool: <PenTool className="w-4 h-4" />,
+  Film: <Film className="w-4 h-4" />,
+  Activity: <Activity className="w-4 h-4" />,
+  Leaf: <Leaf className="w-4 h-4" />,
+  GraduationCap: <GraduationCap className="w-4 h-4" />
 };
 
 export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) => {
@@ -54,6 +67,7 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
   const [organization, setOrganization] = useState('');
   const [social, setSocial] = useState('');
   const [shareContact, setShareContact] = useState(true);
+  const [dataConsent, setDataConsent] = useState(true);
 
   // Creative Data
   const [role, setRole] = useState('');
@@ -64,21 +78,24 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
   const [resources, setResources] = useState('');
   const [statusMessage, setStatusMessage] = useState<{ text: string; isError?: boolean } | null>(null);
 
+  // Multidisciplinary selection without strict upper limit
   const toggleLanguage = (langName: string) => {
     if (selectedLanguages.includes(langName)) {
       setSelectedLanguages(selectedLanguages.filter((l) => l !== langName));
-      setStatusMessage(null);
     } else {
-      if (selectedLanguages.length >= 3) {
-        setStatusMessage({
-          text: 'Puedes elegir máximo 3 lenguajes creativos para priorizar tu enfoque.',
-          isError: true
-        });
-        return;
-      }
       setSelectedLanguages([...selectedLanguages, langName]);
-      setStatusMessage(null);
     }
+    setStatusMessage(null);
+  };
+
+  const selectAllLanguages = () => {
+    setSelectedLanguages(CREATIVE_LANGUAGES.map((l) => l.name));
+    setStatusMessage(null);
+  };
+
+  const clearLanguages = () => {
+    setSelectedLanguages([]);
+    setStatusMessage(null);
   };
 
   const handleReset = () => {
@@ -90,6 +107,7 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
     setOrganization('');
     setSocial('');
     setShareContact(true);
+    setDataConsent(true);
     setRole('');
     setSelectedLanguages([]);
     setThemes('');
@@ -110,9 +128,17 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
       return;
     }
 
+    if (!dataConsent) {
+      setStatusMessage({
+        text: 'Por favor marca la casilla de autorización para que Manuel Palacio (+57 300 610 1221) y Núcleo Colectivo puedan registrar tus datos en el taller.',
+        isError: true
+      });
+      return;
+    }
+
     if (selectedLanguages.length === 0) {
       setStatusMessage({
-        text: 'Por favor, selecciona al menos 1 lenguaje creativo (máximo 3) para continuar.',
+        text: 'Por favor, selecciona al menos 1 lenguaje creativo que te interese para continuar.',
         isError: true
       });
       return;
@@ -136,6 +162,7 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
       organization: organization.trim(),
       social: social.trim(),
       shareContact,
+      dataConsent: true,
       role: role || 'Participante del taller',
       languages: selectedLanguages,
       themes: themes.trim(),
@@ -176,11 +203,11 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
             01. Cuéntanos de ti y conecta con la red
           </h2>
           <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-xl">
-            Registra tu nombre, datos de contacto e intereses creativos para sumarte al mapa colectivo y conectar con otros creadores.
+            Registra tu nombre, datos de contacto y selecciona todos los lenguajes creativos que te interesen para sumarte al mapa colectivo.
           </p>
         </div>
         <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#dedbd3] bg-white text-xs font-bold text-[#111111]">
-          ⏱ Participación · 3–5 min
+          ⏱ Participación abierta · 3–5 min
         </span>
       </div>
 
@@ -342,40 +369,97 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
               </div>
             </div>
 
-            {/* Checkbox compartir datos con el colectivo */}
-            <div className="mt-4 pt-3 border-t border-stone-200 flex items-center gap-2.5">
-              <input
-                id="form-share"
-                type="checkbox"
-                checked={shareContact}
-                onChange={(e) => setShareContact(e.target.checked)}
-                className="w-4 h-4 text-[#7656ff] border-stone-300 rounded focus:ring-[#7656ff] accent-[#7656ff] cursor-pointer"
-              />
-              <label htmlFor="form-share" className="text-xs text-stone-700 font-medium cursor-pointer">
-                Compartir mi contacto en el Directorio del Taller para conectar y colaborar con otros participantes.
-              </label>
+            {/* Checkboxes de autorización y contacto */}
+            <div className="mt-4 pt-4 border-t border-stone-200 space-y-3">
+              {/* Autorización Habeas Data Manuel Palacio */}
+              <div className="flex items-start gap-3 p-3 bg-white rounded-xl border border-stone-200/90 shadow-2xs">
+                <input
+                  id="form-consent"
+                  type="checkbox"
+                  required
+                  checked={dataConsent}
+                  onChange={(e) => setDataConsent(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-[#7656ff] border-stone-300 rounded focus:ring-[#7656ff] accent-[#7656ff] cursor-pointer"
+                />
+                <label htmlFor="form-consent" className="text-xs text-stone-800 leading-snug cursor-pointer">
+                  <strong className="text-stone-900 block font-bold mb-0.5">
+                    Autorización de tratamiento de datos (Habeas Data):
+                  </strong>
+                  Autorizo a <strong>Manuel Palacio (+57 300 610 1221)</strong> y a <strong>Núcleo Colectivo</strong> a recopilar y custodiar mis datos para la memoria del taller, convocatorias culturales y la red de colaboración creativa.
+                </label>
+              </div>
+
+              {/* Checkbox compartir contacto en el directorio */}
+              <div className="flex items-center gap-2.5 px-1">
+                <input
+                  id="form-share"
+                  type="checkbox"
+                  checked={shareContact}
+                  onChange={(e) => setShareContact(e.target.checked)}
+                  className="w-4 h-4 text-[#7656ff] border-stone-300 rounded focus:ring-[#7656ff] accent-[#7656ff] cursor-pointer"
+                />
+                <label htmlFor="form-share" className="text-xs text-stone-700 font-medium cursor-pointer">
+                  Compartir mi contacto en el Directorio del Taller para conectar y colaborar con otros participantes.
+                </label>
+              </div>
+
+              {/* Contacto directo con Manuel Palacio */}
+              <div className="pt-2 text-[11px] text-stone-500 flex items-center justify-between flex-wrap gap-2">
+                <span>Facilitador del laboratorio: <strong>Manuel Palacio</strong></span>
+                <a
+                  href="https://wa.me/573006101221?text=Hola%20Manuel,%20tengo%20una%20consulta%20sobre%20el%20Laboratorio%20de%20Medios%20Digitales%20e%20IA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-700 hover:text-emerald-800 font-bold hover:underline inline-flex items-center gap-1"
+                >
+                  <MessageCircle className="w-3 h-3 text-emerald-600" />
+                  <span>WhatsApp directo: +57 300 610 1221</span>
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* SECTION B: LENGUAJES CREATIVOS */}
+          {/* SECTION B: LENGUAJES CREATIVOS (SIN LÍMITE RESTRICTIVO DE 3) */}
           <div>
-            <div className="flex items-center justify-between flex-wrap gap-2 mb-2.5">
-              <label className="block text-sm font-extrabold text-[#111111]">
-                B. ¿Qué lenguajes creativos te interesan?{' '}
-                <span className="font-normal text-stone-500">(elige hasta 3)</span>
-              </label>
-              <span
-                className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                  selectedLanguages.length === 3
-                    ? 'bg-[#eee9ff] text-[#5e48d5]'
-                    : selectedLanguages.length > 0
-                    ? 'bg-stone-100 text-[#111111]'
-                    : 'bg-stone-100 text-stone-500'
-                }`}
-                aria-live="polite"
-              >
-                {selectedLanguages.length} de 3 seleccionados
-              </span>
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+              <div>
+                <label className="block text-sm font-extrabold text-[#111111]">
+                  B. ¿Qué lenguajes creativos te interesan?{' '}
+                  <span className="font-normal text-stone-500">(selecciona todos los que te convoquen)</span>
+                </label>
+                <span className="text-xs text-stone-500 block mt-0.5">
+                  Elige libremente todas tus disciplinas y áreas de curiosidad para reflejar tu perfil multidisciplinario.
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={selectAllLanguages}
+                  className="px-3 py-1 text-xs font-bold text-[#7656ff] bg-[#eee9ff] hover:bg-[#ded4ff] rounded-full transition cursor-pointer"
+                >
+                  Seleccionar todos
+                </button>
+                {selectedLanguages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearLanguages}
+                    className="px-2.5 py-1 text-xs font-medium text-stone-500 hover:text-stone-800 transition cursor-pointer"
+                  >
+                    Limpiar
+                  </button>
+                )}
+                <span
+                  className={`text-xs font-extrabold px-3 py-1 rounded-full transition ${
+                    selectedLanguages.length > 0
+                      ? 'bg-[#111111] text-[#f8c300] shadow-2xs'
+                      : 'bg-stone-100 text-stone-500'
+                  }`}
+                  aria-live="polite"
+                >
+                  {selectedLanguages.length} seleccionados
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -502,27 +586,43 @@ export const ParticipantForm: React.FC<ParticipantFormProps> = ({ onSubmit }) =>
             </button>
           </div>
 
-          {/* Status feedback message */}
+          {/* Personalized Welcome & WhatsApp Introduction Banner */}
           {statusMessage && (
             <div
-              className={`p-4 rounded-2xl text-xs sm:text-sm font-medium transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+              className={`p-5 rounded-2xl text-xs sm:text-sm font-medium transition ${
                 statusMessage.isError
                   ? 'bg-rose-50 border border-rose-200 text-rose-800'
-                  : 'bg-[#fff9db] border-l-4 border-[#25D366] text-stone-900'
+                  : 'bg-[#fff9db] border-2 border-[#25D366] text-stone-900 shadow-sm'
               }`}
               aria-live="polite"
             >
-              <div>{statusMessage.text}</div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#f8c300]" />
+                  <strong className="text-base font-black text-stone-900">
+                    {statusMessage.text}
+                  </strong>
+                </div>
+
+                {!statusMessage.isError && (
+                  <a
+                    href="https://chat.whatsapp.com/ErtCU75vz84H95zQ7Lj8rM"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-full text-xs font-black shrink-0 transition shadow-xs"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Entrar al Grupo de WhatsApp</span>
+                  </a>
+                )}
+              </div>
+
               {!statusMessage.isError && (
-                <a
-                  href="https://chat.whatsapp.com/ErtCU75vz84H95zQ7Lj8rM"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-full text-xs font-black shrink-0 transition"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Unirme al Grupo de WhatsApp</span>
-                </a>
+                <div className="pt-3 border-t border-[#25D366]/30 text-xs text-stone-700 space-y-2">
+                  <p>
+                    🎉 <strong>Siguiente paso recomendado:</strong> Preséntate en el grupo de WhatsApp con tu nombre y lo que te gustaría crear para que el colectivo empiece a conocerte.
+                  </p>
+                </div>
               )}
             </div>
           )}

@@ -88,6 +88,22 @@ Recursos ofrecidos: ${user.resources || ''}`;
     }
   };
 
+  const handleSendReportToManuel = () => {
+    if (contributions.length === 0) {
+      alert('Aún no hay inscritos registrados.');
+      return;
+    }
+    const lines = contributions.map(
+      (c, i) =>
+        `${i + 1}. *${c.name || c.alias}* (${c.role || 'Participante'}) - Tel: ${c.phone || 'S/N'} - Correo: ${c.email || 'S/C'} - Territorio: ${c.location || 'N/D'} - Lenguajes: ${(c.languages || []).join(', ')} [Habeas Data: SÍ]`
+    );
+
+    const message = `*REPORTE DE INSCRITOS AUTORIZADOS*\nLaboratorio de Medios Digitales e IA · Núcleo Colectivo\nFacilitador: Manuel Palacio (+57 300 610 1221)\nTotal inscritos con autorización: ${contributions.length}\n\n${lines.join('\n\n')}`;
+
+    const url = `https://wa.me/573006101221?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
   const handleExportDirectoryCsv = () => {
     if (contributions.length === 0) {
       alert('Aún no hay participantes registrados.');
@@ -106,6 +122,7 @@ Recursos ofrecidos: ${user.resources || ''}`;
       'Lenguajes Creativos',
       'Deseo Creativo',
       'Recursos y Saberes Disponibles',
+      'Autorización Tratamiento de Datos (Manuel Palacio / Núcleo Colectivo)',
       'Fecha Registro'
     ];
 
@@ -121,6 +138,7 @@ Recursos ofrecidos: ${user.resources || ''}`;
       (c.languages || []).join(' | '),
       c.wish || '',
       c.resources || '',
+      'AUTORIZADO (Ley Habeas Data)',
       c.createdAt || ''
     ]);
 
@@ -136,7 +154,7 @@ Recursos ofrecidos: ${user.resources || ''}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `directorio-participantes-nucleo-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `directorio-inscritos-autorizados-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -146,23 +164,34 @@ Recursos ofrecidos: ${user.resources || ''}`;
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
           <span className="text-xs font-black uppercase tracking-widest text-[#5e48d5]">
-            Paso 05 · Directorio & Conexión
+            Paso 03 · Directorio con Autorización
           </span>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111]">
-            05. Red de Creadores del Taller
+            03. Red de Creadores del Taller
           </h2>
           <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-xl">
-            Conecta con los participantes del taller. Descubre con quién puedes hacer equipo, qué saberes se ofrecen y ponte en contacto directo.
+            Inscritos con autorización expresa para <strong>Manuel Palacio (+57 300 610 1221)</strong> y la red de Núcleo Colectivo.
           </p>
         </div>
 
-        <button
-          onClick={handleExportDirectoryCsv}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#111111] hover:bg-stone-800 text-white rounded-full text-xs font-bold transition shadow-xs self-start sm:self-auto cursor-pointer"
-        >
-          <Download className="w-3.5 h-3.5 text-[#f8c300]" />
-          <span>Exportar Directorio de Contactos (CSV)</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleSendReportToManuel}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#25D366] hover:bg-[#20ba59] text-white rounded-full text-xs font-bold transition shadow-xs cursor-pointer"
+            title="Enviar listado de inscritos a Manuel (+57 300 610 1221) por WhatsApp"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>Enviar reporte a Manuel (+57 300 610 1221)</span>
+          </button>
+
+          <button
+            onClick={handleExportDirectoryCsv}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#111111] hover:bg-stone-800 text-white rounded-full text-xs font-bold transition shadow-xs cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-[#f8c300]" />
+            <span>Exportar CSV con Autorizaciones</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs">

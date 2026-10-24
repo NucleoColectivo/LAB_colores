@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import {
   QrCode,
@@ -8,9 +8,11 @@ import {
   Globe,
   ExternalLink,
   MessageCircle,
-  Share2,
   Sparkles,
-  Server
+  ArrowDown,
+  Smartphone,
+  Radio,
+  Wifi
 } from 'lucide-react';
 import {
   OFFICIAL_WORKSHOP_URL,
@@ -19,315 +21,260 @@ import {
   OFFICIAL_WHATSAPP_QR_ASSET_PATH
 } from '../types';
 
-export const ConnectionQR: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'whatsapp' | 'web'>('whatsapp');
-  const [publicUrl, setPublicUrl] = useState<string>(OFFICIAL_WORKSHOP_URL);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [isCopiedWa, setIsCopiedWa] = useState<boolean>(false);
+interface ConnectionQRProps {
+  onScrollToForm?: () => void;
+}
 
-  const handleCopyUrl = async (url: string, isWa: boolean) => {
+export const ConnectionQR: React.FC<ConnectionQRProps> = ({ onScrollToForm }) => {
+  const [currentAppUrl, setCurrentAppUrl] = useState('');
+  const [liveQrDataUrl, setLiveQrDataUrl] = useState<string>('');
+  const [useLiveSyncQr, setUseLiveSyncQr] = useState(true);
+  const [isCopiedWeb, setIsCopiedWeb] = useState(false);
+  const [isCopiedWa, setIsCopiedWa] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const liveUrl = window.location.href;
+      setCurrentAppUrl(liveUrl);
+      QRCode.toDataURL(liveUrl, {
+        width: 380,
+        margin: 2,
+        color: { dark: '#111111', light: '#ffffff' }
+      }).then(setLiveQrDataUrl).catch(() => {});
+    }
+  }, []);
+
+  const handleCopy = async (url: string, isWa: boolean) => {
     try {
       await navigator.clipboard.writeText(url);
       if (isWa) {
         setIsCopiedWa(true);
         setTimeout(() => setIsCopiedWa(false), 2500);
       } else {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2500);
+        setIsCopiedWeb(true);
+        setTimeout(() => setIsCopiedWeb(false), 2500);
       }
     } catch {
       // fallback
     }
   };
 
-  const handleDownloadImage = (path: string, filename: string) => {
+  const handleDownload = (path: string, filename: string) => {
     const a = document.createElement('a');
     a.href = path;
     a.download = filename;
     a.click();
   };
 
+  const activeWebUrl = useLiveSyncQr ? currentAppUrl : OFFICIAL_WORKSHOP_URL;
+  const activeWebQrImage = useLiveSyncQr ? (liveQrDataUrl || OFFICIAL_QR_ASSET_PATH) : OFFICIAL_QR_ASSET_PATH;
+
   return (
-    <section id="conexion" className="py-10 scroll-mt-20">
+    <section id="conexion" className="py-8 scroll-mt-20">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
-          <span className="text-xs font-black uppercase tracking-widest text-[#5e48d5]">
-            Paso 04 · Conexión Grupal
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111]">
-            04. Códigos QR & Grupo de WhatsApp
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111111] text-[#f8c300] text-xs font-black uppercase tracking-wider mb-2">
+            <Smartphone className="w-3.5 h-3.5" />
+            <span>Punto de Inicio · Escanea para Participar</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-[#111111]">
+            Antes de llenar tus datos: escanea y conéctate
           </h2>
-          <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-xl">
-            Dos vías directas para conectar a la comunidad: el grupo de WhatsApp del laboratorio y la plataforma web participativa.
+          <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-2xl">
+            Abre la cámara de tu celular y enfoca el código para abrir la ficha en tu móvil o unirte al grupo de WhatsApp del laboratorio.
           </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex items-center gap-2 bg-stone-200 p-1.5 rounded-full text-xs font-black self-start sm:self-auto">
+        {onScrollToForm && (
           <button
-            onClick={() => setActiveTab('whatsapp')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition cursor-pointer ${
-              activeTab === 'whatsapp'
-                ? 'bg-[#25D366] text-white shadow-xs'
-                : 'text-stone-700 hover:text-stone-900'
-            }`}
+            onClick={onScrollToForm}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-xs sm:text-sm transition shadow-xs self-start sm:self-auto cursor-pointer"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>Grupo de WhatsApp</span>
+            <span>Ir directo al formulario ↓</span>
+            <ArrowDown className="w-3.5 h-3.5" />
           </button>
-          <button
-            onClick={() => setActiveTab('web')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full transition cursor-pointer ${
-              activeTab === 'web'
-                ? 'bg-[#111111] text-white shadow-xs'
-                : 'text-stone-700 hover:text-stone-900'
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5 text-[#f8c300]" />
-            <span>Plataforma Web (lab-colores)</span>
-          </button>
+        )}
+      </div>
+
+      {/* DUAL QR DISPLAY SIDE-BY-SIDE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* CARD 1: PLATAFORMA WEB CON SINCRONIZACIÓN EN VIVO */}
+        <div className="bg-white border-2 border-[#111111] rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-[#f8c300]/15 rounded-full blur-xl pointer-events-none" />
+
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f8c300] text-[#111111] flex items-center gap-1">
+                <Wifi className="w-3 h-3 text-[#111111]" />
+                <span>01 · PLATAFORMA WEB MÓVIL</span>
+              </span>
+
+              {/* Selector entre QR sincronizado y Vercel */}
+              <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-lg text-[10px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setUseLiveSyncQr(true)}
+                  className={`px-2 py-0.5 rounded transition cursor-pointer ${
+                    useLiveSyncQr ? 'bg-[#111111] text-[#f8c300]' : 'text-stone-600'
+                  }`}
+                  title="Abre esta misma pantalla en el celular para que tus datos se vean de inmediato en el computador"
+                >
+                  En vivo (Sincronizado)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUseLiveSyncQr(false)}
+                  className={`px-2 py-0.5 rounded transition cursor-pointer ${
+                    !useLiveSyncQr ? 'bg-[#111111] text-[#f8c300]' : 'text-stone-600'
+                  }`}
+                  title="Abre lab-colores.vercel.app"
+                >
+                  lab-colores
+                </button>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-black text-[#111111] leading-tight mb-2">
+              Abrir ficha en el celular
+            </h3>
+
+            <p className="text-xs sm:text-sm text-[#45423d] leading-relaxed mb-3">
+              {useLiveSyncQr
+                ? '⚡ Escanea para abrir la app conectada en vivo: lo que llenes en tu móvil se reflejará al instante en esta pantalla y en el proyector.'
+                : 'Escanea para abrir la plataforma en lab-colores.vercel.app.'}
+            </p>
+
+            {/* QR Image */}
+            <div className="bg-[#faf9f6] p-4 rounded-2xl border-2 border-stone-200 text-center max-w-[240px] mx-auto mb-4 shadow-inner">
+              <img
+                src={activeWebQrImage}
+                alt="QR para abrir plataforma web"
+                className="w-48 h-48 object-contain block mx-auto rounded-lg"
+              />
+              <span className="block text-[10px] font-mono text-stone-500 mt-2 font-bold truncate">
+                {useLiveSyncQr ? 'Sincronizado con esta pantalla' : 'https://lab-colores.vercel.app/'}
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center gap-2">
+            <a
+              href={activeWebUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-xs transition shadow-xs cursor-pointer text-center"
+            >
+              <span>Abrir en móvil / pestaña</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+
+            <button
+              type="button"
+              onClick={() => handleDownload(activeWebQrImage, 'qr-web-taller.png')}
+              className="p-2.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition cursor-pointer"
+              title="Descargar imagen QR Web"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleCopy(activeWebUrl, false)}
+              className="p-2.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition cursor-pointer"
+              title="Copiar enlace web"
+            >
+              {isCopiedWeb ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        {/* CARD 2: GRUPO DE WHATSAPP OFICIAL */}
+        <div className="bg-white border-2 border-[#25D366] rounded-3xl p-6 sm:p-7 shadow-sm flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-[#25D366]/15 rounded-full blur-xl pointer-events-none" />
+
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#25D366] text-white">
+                02 · GRUPO DE WHATSAPP
+              </span>
+              <span className="text-xs font-mono font-bold text-emerald-700">
+                Canal Oficial
+              </span>
+            </div>
+
+            <h3 className="text-xl font-black text-[#111111] leading-tight mb-2">
+              Taller laboratorio de medios digitales e IA
+            </h3>
+
+            <p className="text-xs sm:text-sm text-[#45423d] leading-relaxed mb-3">
+              Escanea para entrar al chat oficial de la sesión: comparte imágenes generadas, prompts, enlaces y mantén contacto con el grupo.
+            </p>
+
+            {/* WhatsApp QR Image Card */}
+            <div className="bg-[#128C7E] p-3 rounded-2xl text-center max-w-[240px] mx-auto mb-4 shadow-sm">
+              <div className="bg-white rounded-xl p-2.5 overflow-hidden">
+                <img
+                  src={OFFICIAL_WHATSAPP_QR_ASSET_PATH}
+                  alt="QR para unirse al Grupo de WhatsApp"
+                  className="w-44 h-44 object-cover block mx-auto rounded-md"
+                />
+              </div>
+              <span className="block text-[10px] text-white/90 mt-1.5 font-bold">
+                Escanea con la cámara de WhatsApp
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center gap-2">
+            <a
+              href={OFFICIAL_WHATSAPP_GROUP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-black rounded-full text-xs transition shadow-xs cursor-pointer text-center"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Unirme al WhatsApp</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+
+            <button
+              type="button"
+              onClick={() => handleDownload(OFFICIAL_WHATSAPP_QR_ASSET_PATH, 'qr-whatsapp-laboratorio.jpeg')}
+              className="p-2.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition cursor-pointer"
+              title="Descargar imagen QR WhatsApp"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleCopy(OFFICIAL_WHATSAPP_GROUP_URL, true)}
+              className="p-2.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition cursor-pointer"
+              title="Copiar enlace del grupo"
+            >
+              {isCopiedWa ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {activeTab === 'whatsapp' ? (
-        /* WHATSAPP GROUP DISPLAY */
-        <div className="bg-white border-2 border-[#25D366]/40 rounded-3xl p-6 sm:p-8 shadow-sm mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black uppercase tracking-wider">
-                <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-                <span>Canal Oficial de Comunicación</span>
-              </div>
-
-              <h3 className="text-2xl sm:text-3xl font-black text-[#111111] leading-tight">
-                Taller laboratorio de medios digitales e IA
-              </h3>
-
-              <p className="text-sm text-[#45423d] leading-relaxed">
-                Únete al grupo de WhatsApp oficial de Núcleo Colectivo para compartir enlaces de herramientas de IA, imágenes generadas, referencias sonoras y coordinar los proyectos colectivos.
-              </p>
-
-              <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 flex items-center justify-between gap-3 flex-wrap">
-                <div className="min-w-0">
-                  <span className="text-[11px] font-bold text-stone-500 uppercase block">
-                    Enlace de invitación directa:
-                  </span>
-                  <a
-                    href={OFFICIAL_WHATSAPP_GROUP_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-xs text-[#25D366] hover:underline font-bold truncate block"
-                  >
-                    {OFFICIAL_WHATSAPP_GROUP_URL}
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleCopyUrl(OFFICIAL_WHATSAPP_GROUP_URL, true)}
-                    className="px-3 py-1.5 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
-                  >
-                    {isCopiedWa ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                    <span>{isCopiedWa ? 'Copiado' : 'Copiar'}</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <a
-                  href={OFFICIAL_WHATSAPP_GROUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-black rounded-full text-sm transition shadow-sm cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Unirme al Grupo de WhatsApp</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleDownloadImage(
-                      OFFICIAL_WHATSAPP_QR_ASSET_PATH,
-                      'qr-whatsapp-laboratorio-ia.jpeg'
-                    )
-                  }
-                  className="inline-flex items-center gap-1.5 px-4 py-3 bg-stone-100 hover:bg-stone-200 text-[#111111] border border-stone-300 font-bold rounded-full text-xs sm:text-sm transition cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Descargar Tarjeta QR de WhatsApp</span>
-                </button>
-              </div>
-
-              <p className="text-xs text-stone-500">
-                💬 Puedes proyectar esta tarjeta o imprimirla para que los participantes escaneen desde la app de WhatsApp.
-              </p>
-            </div>
-
-            {/* Official WhatsApp QR Image Card */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="bg-[#128C7E] p-3 rounded-3xl shadow-lg max-w-[290px] w-full text-center">
-                <div className="bg-white rounded-2xl p-4 overflow-hidden shadow-inner">
-                  <img
-                    src={OFFICIAL_WHATSAPP_QR_ASSET_PATH}
-                    alt="QR del Grupo de WhatsApp: Taller laboratorio de medios digitales e IA"
-                    className="w-full h-auto object-cover rounded-xl"
-                  />
-                </div>
-                <div className="py-2.5 text-white">
-                  <strong className="text-xs font-bold block">
-                    Escanea con la cámara de WhatsApp
-                  </strong>
-                  <span className="text-[11px] text-white/80">
-                    Comunidad viva de experimentación
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Guide Banner before filling data */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#fff9db] border-l-4 border-[#f8c300] text-xs text-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <strong className="text-stone-900 font-bold block text-sm mb-0.5">
+            ¿Ya escaneaste o estás navegando desde tu dispositivo?
+          </strong>
+          <span>Avanza al <strong>Paso 01</strong> aquí abajo para ingresar tu nombre, datos de contacto y lenguajes artísticos.</span>
         </div>
-      ) : (
-        /* WEB APP DISPLAY */
-        <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs mb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fff1a8] text-[#8a6800] text-xs font-black uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Plataforma Web Móvil</span>
-              </div>
 
-              <h3 className="text-xl sm:text-2xl font-black text-[#111111] leading-tight">
-                Participar en <span className="text-[#7656ff]">lab-colores.vercel.app</span>
-              </h3>
-
-              <p className="text-sm text-[#45423d] leading-relaxed">
-                Escanea este código QR con la cámara de cualquier teléfono para completar la ficha de intereses, seleccionar hasta 3 lenguajes creativos y visualizar el mapa colectivo en tiempo real.
-              </p>
-
-              <div className="space-y-1.5 pt-1">
-                <label className="block text-xs font-bold text-stone-700">
-                  Dirección web oficial:
-                </label>
-                <div className="relative">
-                  <Globe className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="url"
-                    readOnly
-                    value={OFFICIAL_WORKSHOP_URL}
-                    className="w-full pl-10 pr-4 py-2.5 border border-[#c9c5bc] rounded-xl text-xs sm:text-sm text-[#111111] bg-stone-50 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                <a
-                  href={OFFICIAL_WORKSHOP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-xs sm:text-sm transition cursor-pointer"
-                >
-                  <span>Abrir Web en Nueva Pestaña</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleDownloadImage(
-                      OFFICIAL_QR_ASSET_PATH,
-                      'qr-lab-colores-nucleo.png'
-                    )
-                  }
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-[#111111] border border-stone-300 font-bold rounded-full text-xs sm:text-sm transition cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Descargar QR Web</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleCopyUrl(OFFICIAL_WORKSHOP_URL, false)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-[#111111] border border-stone-300 font-bold rounded-full text-xs sm:text-sm transition cursor-pointer"
-                >
-                  {isCopied ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                  <span>{isCopied ? 'URL Copiada' : 'Copiar URL'}</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="bg-[#faf9f6] border-2 border-[#111111] rounded-3xl p-6 text-center max-w-[300px] w-full shadow-md flex flex-col items-center">
-                <div className="bg-white p-4 rounded-2xl border border-stone-300 shadow-sm mb-3.5">
-                  <img
-                    src={OFFICIAL_QR_ASSET_PATH}
-                    alt="Código QR para https://lab-colores.vercel.app/"
-                    className="w-52 h-52 object-contain block mx-auto rounded-lg"
-                  />
-                </div>
-
-                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#111111] text-[#f8c300] text-[10px] font-mono font-bold uppercase mb-1">
-                  <span>lab-colores.vercel.app</span>
-                </div>
-
-                <strong className="text-sm font-black text-[#111111] block">
-                  Escanea para participar
-                </strong>
-                <p className="text-[11px] text-[#6e6b66] leading-tight mt-0.5">
-                  Apunta con la cámara de tu celular para abrir la ficha participativa.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Connection & Network Instructions */}
-      <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
-        <h3 className="text-lg font-black text-[#111111] flex items-center gap-2">
-          <Server className="w-5 h-5 text-[#7656ff]" />
-          <span>Ecosistema de Conexión del Laboratorio</span>
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-stone-700">
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-            <span className="w-6 h-6 rounded-full bg-[#25D366] text-white flex items-center justify-center font-bold text-xs mb-2">
-              1
-            </span>
-            <strong className="text-stone-900 block font-bold text-sm mb-1">
-              Grupo de WhatsApp
-            </strong>
-            Canal de conversación instantánea, avisos de las sesiones y envío de fotos/archivos.
-          </div>
-
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-            <span className="w-6 h-6 rounded-full bg-[#f8c300] text-[#111111] flex items-center justify-center font-bold text-xs mb-2">
-              2
-            </span>
-            <strong className="text-stone-900 block font-bold text-sm mb-1">
-              Plataforma Web (lab-colores)
-            </strong>
-            Lugar donde cada persona diligencia sus lenguajes artísticos, memorias y temas de interés.
-          </div>
-
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200">
-            <span className="w-6 h-6 rounded-full bg-[#111111] text-[#f8c300] flex items-center justify-center font-bold text-xs mb-2">
-              3
-            </span>
-            <strong className="text-stone-900 block font-bold text-sm mb-1">
-              Mapa Colectivo & Cruces
-            </strong>
-            Visualización proyectada en pared para detonar proyectos conjuntos entre saberes tradicionales y tecnología.
-          </div>
-        </div>
+        {onScrollToForm && (
+          <button
+            onClick={onScrollToForm}
+            className="inline-flex items-center gap-1 px-4 py-2 bg-[#111111] hover:bg-stone-800 text-white font-bold rounded-full text-xs shrink-0 transition cursor-pointer"
+          >
+            <span>Llenar mis datos ahora ↓</span>
+          </button>
+        )}
       </div>
     </section>
   );
