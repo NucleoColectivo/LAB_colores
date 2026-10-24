@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ParticipantContribution, CREATIVE_LANGUAGES, WORKSHOP_STEPS } from '../types';
-import { X, Tv, QrCode, Sparkles, Layers, Users, Clock } from 'lucide-react';
-import QRCode from 'qrcode';
+import {
+  ParticipantContribution,
+  CREATIVE_LANGUAGES,
+  WORKSHOP_STEPS,
+  OFFICIAL_WORKSHOP_URL,
+  OFFICIAL_QR_ASSET_PATH,
+  OFFICIAL_WHATSAPP_GROUP_URL,
+  OFFICIAL_WHATSAPP_QR_ASSET_PATH
+} from '../types';
+import { X, Tv, Layers, Users, Clock, MessageCircle, Globe, ExternalLink } from 'lucide-react';
 
 interface ProjectorModalProps {
   isOpen: boolean;
@@ -14,17 +21,7 @@ export const ProjectorModal: React.FC<ProjectorModalProps> = ({
   onClose,
   contributions
 }) => {
-  const [qrUrl, setQrUrl] = useState<string>('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      QRCode.toDataURL(window.location.href, {
-        width: 240,
-        margin: 1,
-        color: { dark: '#111111', light: '#ffffff' }
-      }).then(setQrUrl).catch(() => {});
-    }
-  }, []);
+  const [projectorQrMode, setProjectorQrMode] = useState<'whatsapp' | 'web'>('whatsapp');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -71,12 +68,12 @@ export const ProjectorModal: React.FC<ProjectorModalProps> = ({
           <div>
             <div className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
               <span>NÚCLEO COLECTIVO</span>
-              <span className="text-[#f8c300] font-mono text-sm uppercase px-2 py-0.5 rounded bg-stone-900 border border-stone-800">
-                PANTALLA DE TALLER
+              <span className="text-[#f8c300] font-mono text-sm uppercase px-2.5 py-0.5 rounded bg-stone-900 border border-stone-800">
+                PANTALLA DE PROYECCIÓN
               </span>
             </div>
             <p className="text-xs text-stone-400">
-              Sesión 1 · Escuchar y enfocar · Proyección comunitaria en vivo
+              Sesión 1 · Escuchar y enfocar · Medios Digitales e Inteligencia Artificial
             </p>
           </div>
         </div>
@@ -100,19 +97,20 @@ export const ProjectorModal: React.FC<ProjectorModalProps> = ({
         {/* Left: Collective Map Visual Bars (Large) */}
         <div className="lg:col-span-8 bg-[#161616] border border-stone-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 className="text-2xl font-black text-white flex items-center gap-2.5">
                 <Layers className="w-6 h-6 text-[#7656ff]" />
                 <span>Cartografía de Afinidades Creativas</span>
               </h2>
-              <span className="text-sm font-bold text-[#f8c300] bg-[#f8c300]/10 px-3 py-1 rounded-full border border-[#f8c300]/30">
-                {contributions.length} participantes han sumado sus voces
+              <span className="text-sm font-bold text-[#f8c300] bg-[#f8c300]/10 px-3 py-1 rounded-full border border-[#f8c300]/30 flex items-center gap-1.5">
+                <Users className="w-4 h-4" />
+                <span>{contributions.length} participantes conectados</span>
               </span>
             </div>
 
             {sortedLanguages.length === 0 ? (
               <div className="py-20 text-center text-stone-500 text-lg">
-                Esperando los primeros aportes desde los celulares...
+                Esperando los primeros registros desde lab-colores.vercel.app...
               </div>
             ) : (
               <div className="space-y-4 my-4">
@@ -140,37 +138,99 @@ export const ProjectorModal: React.FC<ProjectorModalProps> = ({
             )}
           </div>
 
-          <div className="pt-4 border-t border-stone-800 flex items-center justify-between text-xs text-stone-400 font-mono">
-            <span>METODOLOGÍA NÚCLEO COLECTIVO</span>
-            <span>CREAR CON LO QUE TENEMOS</span>
+          {/* Latest connected participants ticker */}
+          <div className="pt-4 border-t border-stone-800">
+            <span className="text-[11px] font-mono uppercase text-stone-400 block mb-2">
+              ÚLTIMAS PERSONAS REGISTRADAS EN LA RED:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {contributions.slice(-6).reverse().map((c) => (
+                <span
+                  key={c.id}
+                  className="px-2.5 py-1 rounded-lg bg-stone-900 border border-stone-800 text-xs text-stone-200 flex items-center gap-1.5"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#f8c300]" />
+                  <strong className="text-white">{c.name || c.alias}</strong>
+                  {c.location && <span className="text-stone-400 text-[10px]">({c.location})</span>}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Right: QR Code to scan + Workshop moment */}
+        {/* Right: Dual QR Selector (WhatsApp Group vs Web App) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          {/* QR Code Big Scan Box */}
-          <div className="bg-[#f8c300] text-[#111111] rounded-3xl p-6 text-center flex flex-col items-center justify-center shadow-lg">
-            <span className="text-xs font-black uppercase tracking-widest bg-[#111111] text-[#f8c300] px-3 py-1 rounded-full mb-3">
-              ESCANEA CON TU CELULAR
-            </span>
-            <div className="bg-white p-3 rounded-2xl shadow-sm border-2 border-[#111111] mb-3">
-              {qrUrl ? (
-                <img
-                  src={qrUrl}
-                  alt="QR para participar"
-                  className="w-44 h-44 object-contain block mx-auto"
-                />
-              ) : (
-                <div className="w-44 h-44 flex items-center justify-center font-mono text-xs text-stone-500">
-                  Cargando QR...
-                </div>
-              )}
+          <div
+            className={`rounded-3xl p-6 text-center flex flex-col items-center justify-center shadow-lg transition-colors duration-200 ${
+              projectorQrMode === 'whatsapp'
+                ? 'bg-[#128C7E] text-white'
+                : 'bg-[#f8c300] text-[#111111]'
+            }`}
+          >
+            {/* Toggle QR mode on projector */}
+            <div className="flex items-center gap-1 bg-black/20 p-1 rounded-full mb-3 text-xs font-black">
+              <button
+                onClick={() => setProjectorQrMode('whatsapp')}
+                className={`px-3 py-1 rounded-full transition cursor-pointer flex items-center gap-1 ${
+                  projectorQrMode === 'whatsapp'
+                    ? 'bg-white text-[#128C7E]'
+                    : 'text-white/80 hover:text-white'
+                }`}
+              >
+                <MessageCircle className="w-3 h-3" />
+                <span>WhatsApp</span>
+              </button>
+              <button
+                onClick={() => setProjectorQrMode('web')}
+                className={`px-3 py-1 rounded-full transition cursor-pointer flex items-center gap-1 ${
+                  projectorQrMode === 'web'
+                    ? 'bg-[#111111] text-[#f8c300]'
+                    : 'text-stone-900/80 hover:text-stone-900'
+                }`}
+              >
+                <Globe className="w-3 h-3" />
+                <span>Web lab-colores</span>
+              </button>
             </div>
-            <strong className="text-lg font-black leading-tight text-[#111111]">
-              Suma tu mirada al taller
+
+            {/* QR Card */}
+            <div className="bg-white p-3.5 rounded-2xl shadow-sm border-2 border-black/20 mb-3 max-w-[230px]">
+              <img
+                src={
+                  projectorQrMode === 'whatsapp'
+                    ? OFFICIAL_WHATSAPP_QR_ASSET_PATH
+                    : OFFICIAL_QR_ASSET_PATH
+                }
+                alt={
+                  projectorQrMode === 'whatsapp'
+                    ? 'QR Grupo de WhatsApp'
+                    : 'QR Web lab-colores'
+                }
+                className="w-48 h-48 object-contain block mx-auto rounded-md"
+              />
+            </div>
+
+            <div
+              className={`px-3 py-1 rounded-lg font-mono text-xs font-bold mb-1 ${
+                projectorQrMode === 'whatsapp'
+                  ? 'bg-black/30 text-emerald-100'
+                  : 'bg-[#111111] text-white'
+              }`}
+            >
+              {projectorQrMode === 'whatsapp'
+                ? 'chat.whatsapp.com/ErtCU75...'
+                : 'lab-colores.vercel.app'}
+            </div>
+
+            <strong className="text-base font-black leading-tight">
+              {projectorQrMode === 'whatsapp'
+                ? 'Únete al Grupo de WhatsApp'
+                : 'Suma tu nombre y datos al mapa'}
             </strong>
-            <p className="text-xs font-medium text-stone-800 mt-1">
-              Abre la cámara de tu celular y enfoca el código
+            <p className="text-xs font-medium opacity-90 mt-0.5">
+              {projectorQrMode === 'whatsapp'
+                ? 'Escanea con la cámara de WhatsApp'
+                : 'Apunta con la cámara de tu celular'}
             </p>
           </div>
 
@@ -179,8 +239,8 @@ export const ProjectorModal: React.FC<ProjectorModalProps> = ({
             <span className="text-xs font-black uppercase text-[#7656ff] tracking-widest block mb-2">
               RUTA DE LA SESIÓN
             </span>
-            <div className="space-y-2.5 text-xs">
-              {WORKSHOP_STEPS.map((s, i) => (
+            <div className="space-y-2 text-xs">
+              {WORKSHOP_STEPS.map((s) => (
                 <div
                   key={s.num}
                   className="flex items-center justify-between p-2 rounded-xl bg-stone-900 border border-stone-800"

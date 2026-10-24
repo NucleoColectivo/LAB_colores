@@ -10,10 +10,11 @@ import {
   Layers,
   Sparkles,
   Users,
-  MessageSquare,
-  HelpCircle,
   Tag,
-  PlusCircle
+  PlusCircle,
+  Mail,
+  MapPin,
+  Building2
 } from 'lucide-react';
 
 interface CollectiveMapProps {
@@ -65,7 +66,6 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
     const wordCounts: Record<string, number> = {};
     contributions.forEach((c) => {
       if (!c.themes) return;
-      // split by commas, semicolons, periods, or newlines
       const tokens = c.themes
         .split(/[,;.\n]/)
         .map((s) => s.trim())
@@ -100,7 +100,7 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
     );
   }, [contributions, selectedTagFilter]);
 
-  // Export CSV
+  // Export CSV with full user data
   const handleExportCsv = () => {
     if (contributions.length === 0) {
       alert('Aún no hay aportes registrados para exportar.');
@@ -109,7 +109,13 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
 
     const headers = [
       'ID',
-      'Seudónimo / Nombre',
+      'Nombre Completo',
+      'Apodo / Alias',
+      'Correo Electrónico',
+      'Teléfono / WhatsApp',
+      'Barrio / Territorio',
+      'Organización / Colectivo',
+      'Red Social',
       'Rol de afinidad',
       'Lenguajes Creativos',
       'Temas y preguntas',
@@ -121,7 +127,13 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
 
     const rows = contributions.map((c) => [
       c.id,
-      c.alias || 'Anónimo',
+      c.name || c.alias,
+      c.alias || '',
+      c.email || '',
+      c.phone || '',
+      c.location || '',
+      c.organization || '',
+      c.social || '',
       c.role || '',
       (c.languages || []).join(' | '),
       c.themes || '',
@@ -145,7 +157,7 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `aportes-nucleo-colectivo-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `mapa-colectivo-nucleo-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -195,7 +207,7 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
           <span className="text-xs font-black uppercase tracking-widest text-[#5e48d5]">
-            Paso 02
+            Paso 02 · Mapeo en Vivo
           </span>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-[#111111]">
             02. Mapa colectivo de afinidades
@@ -231,13 +243,13 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <div className="bg-[#111111] text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-stone-800">
           <span className="text-stone-400 text-xs font-medium block mb-1">
-            Total de aportes
+            Total de participantes
           </span>
           <strong className="text-3xl sm:text-4xl font-black tracking-tight text-white block">
             {contributions.length}
           </strong>
           <span className="text-[11px] text-[#f8c300] font-semibold mt-1 block">
-            en este dispositivo
+            conectados en la sesión
           </span>
         </div>
 
@@ -280,7 +292,6 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
 
       {/* Main Panel */}
       <div className="bg-white border border-[#dedbd3] rounded-3xl p-6 sm:p-8 shadow-xs">
-        {/* Toggle between Analytics view and Voices view */}
         <div className="flex items-center justify-between border-b border-stone-200 pb-4 mb-6 flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <button
@@ -458,7 +469,7 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
                     <div className="flex items-center justify-between gap-2 mb-2.5">
                       <div className="flex items-center gap-2">
                         <span className="font-black text-sm text-[#111111]">
-                          {c.alias || 'Participante anónimo'}
+                          {c.name || c.alias || 'Participante'}
                         </span>
                         <span className="text-[11px] font-semibold text-stone-600 bg-stone-200/80 px-2 py-0.5 rounded-full">
                           {c.role || 'Participante'}
@@ -471,6 +482,13 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
                         })}
                       </span>
                     </div>
+
+                    {(c.location || c.organization) && (
+                      <div className="flex items-center gap-2 text-[11px] text-stone-500 mb-2">
+                        {c.location && <span>📍 {c.location}</span>}
+                        {c.organization && <span>🏛 {c.organization}</span>}
+                      </div>
+                    )}
 
                     {/* Languages badges */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
@@ -530,10 +548,10 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
             <button
               onClick={handleExportCsv}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#111111] hover:bg-stone-800 text-white rounded-full text-xs font-bold transition cursor-pointer active:scale-98"
-              title="Descargar tabla compatible con Excel o Google Sheets"
+              title="Descargar tabla compatible con Excel o Google Sheets con datos completos"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-[#f8c300]" />
-              <span>Exportar CSV</span>
+              <span>Exportar Aportes (CSV)</span>
             </button>
 
             <button
@@ -566,10 +584,6 @@ export const CollectiveMap: React.FC<CollectiveMapProps> = ({
             <span>Borrar datos de este navegador</span>
           </button>
         </div>
-
-        <p className="mt-4 text-[11px] text-stone-500">
-          Nota ética: No exportes ni proyectes respuestas identificables sin consentimiento previo. Acuerden con el grupo qué información desean poner en común en la pantalla compartida.
-        </p>
       </div>
     </section>
   );

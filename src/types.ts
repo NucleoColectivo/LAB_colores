@@ -1,6 +1,13 @@
 export interface ParticipantContribution {
   id: number | string;
+  name: string;
   alias: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  organization?: string;
+  social?: string;
+  shareContact: boolean;
   role: string;
   languages: string[];
   themes: string;
@@ -34,6 +41,11 @@ export interface WorkshopStep {
   desc: string;
   objective: string;
 }
+
+export const OFFICIAL_WORKSHOP_URL = "https://lab-colores.vercel.app/";
+export const OFFICIAL_QR_ASSET_PATH = "/assets/aistudio/adobe-express-qr-code_c69d46d1.png";
+export const OFFICIAL_WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/ErtCU75vz84H95zQ7Lj8rM";
+export const OFFICIAL_WHATSAPP_QR_ASSET_PATH = "/assets/aistudio/WhatsApp_Image_2026-10-24_at_2.23.20_AM_d36c17ad.jpeg";
 
 export const WORKSHOP_STEPS: WorkshopStep[] = [
   {
@@ -241,46 +253,74 @@ export const CROSS_TEMPLATES: CreativeCrossTemplate[] = [
 export const INITIAL_SEED_DATA: ParticipantContribution[] = [
   {
     id: 1719820000001,
+    name: "Lucía Morales Mendoza",
     alias: "Lucía M.",
+    email: "lucia.morales.arte@gmail.com",
+    phone: "+57 312 456 7890",
+    location: "Barrio San Antonio / Cali",
+    organization: "Taller Gráfico La Madriguera",
+    social: "@lucia_grabado",
+    shareContact: true,
     role: "Artista o creador/a",
     languages: ["Imagen e ilustración", "Fotografía y memoria visual", "Cartografía y territorio"],
     themes: "Memorias del río, árboles antiguos del barrio, relatos de abuelas",
-    memory: "Las tardes en la casa de mi abuela cosiendo retazos mientras escuchábamos la radio.",
-    wish: "Poder hacer un fanzine con mapas bordados y fotografías antiguas de los vecinos.",
-    resources: "Cámara digital, acuarelas, scanner casero y ganas de conversar con adultos mayores.",
-    createdAt: "2026-10-23T09:14:00.000Z"
+    memory: "Las tardes en la casa de mi abuela cosiendo retazos mientras escuchábamos la radio comunitaria.",
+    wish: "Poder hacer un fanzine con mapas bordados y fotografías antiguas de los vecinos para repartir en las tiendas.",
+    resources: "Cámara digital, acuarelas, scanner casero y muchas ganas de entrevistar adultos mayores.",
+    createdAt: "2026-10-24T09:14:00.000Z"
   },
   {
     id: 1719820000002,
+    name: "Camilo Rengifo Ortiz",
     alias: "Camilo R.",
+    email: "camilo.creativecode@gmail.com",
+    phone: "+57 301 987 6543",
+    location: "Comuna 4 / Medellín",
+    organization: "Colectivo Sintético Lab",
+    social: "github.com/camilo-code",
+    shareContact: true,
     role: "Estudiante",
     languages: ["Programación creativa", "IA y experimentación", "Sonido y música"],
-    themes: "Música generativa, datos climáticos, inteligencia artificial aplicada al arte",
-    memory: "La primera vez que un código que escribí en p5.js comenzó a reaccionar a los aplausos del público.",
-    wish: "Desarrollar una instalación interactiva donde las plantas del parque generen melodías.",
-    resources: "Laptop, sensores básicos Arduino, teclado MIDI y nociones de Python/JS.",
-    createdAt: "2026-10-23T09:22:00.000Z"
+    themes: "Música generativa, datos bioclimáticos, inteligencia artificial aplicada al paisaje sonoro",
+    memory: "La primera vez que un sketch en p5.js comenzó a modular frecuencias sonoras según la temperatura ambiental.",
+    wish: "Desarrollar una instalación interactiva donde las plantas del parque comunal generen melodías audibles para los transeúntes.",
+    resources: "Laptop, sensores básicos Arduino, teclado MIDI y conocimientos en p5.js y Python.",
+    createdAt: "2026-10-24T09:22:00.000Z"
   },
   {
     id: 1719820000003,
-    alias: "María Elena & Colectivo Huerto",
+    name: "María Elena Zuleta",
+    alias: "Elena Zuleta",
+    email: "huertocomunal.semillas@gmail.com",
+    phone: "+57 315 223 3445",
+    location: "Vereda El Salado",
+    organization: "Red Comunitaria de Semillas Vivas",
+    social: "@semillasvivas_red",
+    shareContact: true,
     role: "Integrante de un colectivo",
     languages: ["Cartografía y territorio", "Instalación y objetos", "Futuros imaginados"],
-    themes: "Soberanía alimentaria, semillas nativas, saberes comunitarios y agua",
-    memory: "El trueque de semillas con campesinas de la cuenca hace tres veranos.",
-    wish: "Un mapa vivo en el parque comunal con señalética ecológica y bancos hechos con material recuperado.",
-    resources: "Espacio en el huerto, madera reciclada, herramientas de carpintería y semillas.",
-    createdAt: "2026-10-23T09:28:00.000Z"
+    themes: "Soberanía alimentaria, semillas nativas, saberes medicinales ancestrales y agua limpia",
+    memory: "El trueque intergeneracional de semillas con campesinas de la cuenca alta hace tres veranos.",
+    wish: "Un mapa vivo en el parque comunal con señalética ecológica y bancos hechos con madera y material recuperado.",
+    resources: "Espacio en el huerto demostrativo, madera reciclada, herramientas de carpintería y catálogo de semillas.",
+    createdAt: "2026-10-24T09:28:00.000Z"
   },
   {
     id: 1719820000004,
+    name: "Mateo Bermúdez Silva",
     alias: "Mateo B.",
+    email: "mateo.profe.artes@gmail.com",
+    phone: "+57 320 889 9001",
+    location: "Localidad Santa Fe / Bogotá",
+    organization: "Colegio Distrital Policarpa Salavarrieta",
+    social: "@mateo_fanzines",
+    shareContact: true,
     role: "Docente o formador/a",
     languages: ["Cómic y narrativas gráficas", "Video y audiovisual", "IA y experimentación"],
-    themes: "Juventudes y tecnología crítica, mitologías urbanas, animación",
-    memory: "Un cómic fotocopiado en blanco y negro que hicimos con mis estudiantes en la escuela rural.",
-    wish: "Crear una serie de microhistorias en animación o cómic sobre los mitos contemporáneos del barrio.",
-    resources: "Tableta digitalizadora, micrófono corbatero, proyector de aula.",
-    createdAt: "2026-10-23T09:35:00.000Z"
+    themes: "Juventudes y tecnología crítica, mitologías urbanas, animación cuadro a cuadro",
+    memory: "Un cómic impreso en mimeógrafo que realizamos colectivamente con estudiantes de grado noveno.",
+    wish: "Crear una serie de microhistorias en animación o cómic sobre los mitos y personajes nocturnos del barrio.",
+    resources: "Tableta digitalizadora, micrófono de solapa, proyector portátil para muros comunitarios.",
+    createdAt: "2026-10-24T09:35:00.000Z"
   }
 ];

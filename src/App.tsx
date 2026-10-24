@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { WorkshopRoute } from './components/WorkshopRoute';
 import { ParticipantForm } from './components/ParticipantForm';
 import { CollectiveMap } from './components/CollectiveMap';
+import { UserNetwork } from './components/UserNetwork';
 import { CreativeCrosses } from './components/CreativeCrosses';
 import { ConnectionQR } from './components/ConnectionQR';
 import { ProjectorModal } from './components/ProjectorModal';
@@ -23,11 +24,18 @@ export default function App() {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setContributions(parsed);
+          // Normalize legacy entries if missing name/contact
+          const normalized = parsed.map((item) => ({
+            ...item,
+            name: item.name || item.alias || 'Participante',
+            email: item.email || '',
+            shareContact: item.shareContact ?? true
+          }));
+          setContributions(normalized);
           return;
         }
       }
-      // If empty on first visit, load seed data to make the app immediately rich and illustrative
+      // Seed initial sample data with realistic names and contacts
       setContributions(INITIAL_SEED_DATA);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_SEED_DATA));
     } catch (e) {
@@ -50,19 +58,19 @@ export default function App() {
     const updated = [...contributions, newRecord];
     saveContributions(updated);
 
-    // Smooth scroll down to Collective Map so the participant can see their contribution live!
-    const mapSection = document.getElementById('mapa');
-    if (mapSection) {
+    // Smooth scroll down to Community Network / Map so the participant sees themselves
+    const networkSection = document.getElementById('comunidad');
+    if (networkSection) {
       setTimeout(() => {
-        mapSection.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
+        networkSection.scrollIntoView({ behavior: 'smooth' });
+      }, 350);
     }
   };
 
   const handleClearAll = () => {
     if (
       window.confirm(
-        '¿Deseas borrar los aportes guardados en este navegador? Esta acción no se puede deshacer.'
+        '¿Deseas borrar los aportes y participantes guardados en este navegador? Esta acción no se puede deshacer.'
       )
     ) {
       saveContributions([]);
@@ -74,9 +82,16 @@ export default function App() {
   };
 
   const handleImportJson = (imported: ParticipantContribution[]) => {
-    // Deduplicate by id if possible, otherwise combine
     const existingIds = new Set(contributions.map((c) => String(c.id)));
-    const filteredNew = imported.filter((item) => !existingIds.has(String(item.id)));
+    const filteredNew = imported
+      .filter((item) => !existingIds.has(String(item.id)))
+      .map((item) => ({
+        ...item,
+        name: item.name || item.alias || 'Participante',
+        email: item.email || '',
+        shareContact: item.shareContact ?? true
+      }));
+
     saveContributions([...contributions, ...filteredNew]);
   };
 
@@ -101,6 +116,11 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToNetwork = () => {
+    const el = document.getElementById('comunidad');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5f3ee] text-[#111111]">
       <Header
@@ -112,6 +132,7 @@ export default function App() {
         <Hero
           onScrollToForm={scrollToForm}
           onScrollToMap={scrollToMap}
+          onScrollToNetwork={scrollToNetwork}
           totalContributions={contributions.length}
         />
 
@@ -126,6 +147,8 @@ export default function App() {
           onImportJson={handleImportJson}
           onLoadSeedData={handleLoadSeedData}
         />
+
+        <UserNetwork contributions={contributions} />
 
         <CreativeCrosses contributions={contributions} />
 

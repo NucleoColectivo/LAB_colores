@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
-import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2, Globe, Users, ExternalLink } from 'lucide-react';
+import { OFFICIAL_WORKSHOP_URL } from '../types';
 
 interface HeroProps {
   onScrollToForm: () => void;
   onScrollToMap: () => void;
+  onScrollToNetwork: () => void;
   totalContributions: number;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, totalContributions }) => {
+export const Hero: React.FC<HeroProps> = ({
+  onScrollToForm,
+  onScrollToMap,
+  onScrollToNetwork,
+  totalContributions
+}) => {
   const [orbSymbols, setOrbSymbols] = useState(['✳', '◉', '✦']);
 
   const cycleSymbols = () => {
@@ -23,9 +30,22 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Column: Narrative & Action */}
         <div className="lg:col-span-7">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eee9ff] text-[#5e48d5] text-xs font-black uppercase tracking-widest mb-4">
-            <span className="w-2 h-2 rounded-full bg-[#7656ff] animate-ping" />
-            <span>Sesión 1 · Escuchar y enfocar</span>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eee9ff] text-[#5e48d5] text-xs font-black uppercase tracking-widest">
+              <span className="w-2 h-2 rounded-full bg-[#7656ff] animate-ping" />
+              <span>Sesión 1 · Escuchar y enfocar</span>
+            </div>
+
+            <a
+              href={OFFICIAL_WORKSHOP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fff9db] border border-[#f8c300]/40 text-[#111111] text-xs font-mono font-bold hover:bg-[#fff2a8] transition"
+            >
+              <Globe className="w-3 h-3 text-[#f8c300]" />
+              <span>lab-colores.vercel.app</span>
+              <ExternalLink className="w-2.5 h-2.5 text-stone-500" />
+            </a>
           </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.94] text-[#111111] mb-5">
@@ -33,7 +53,7 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
           </h1>
 
           <p className="text-base sm:text-lg text-[#45423d] leading-relaxed max-w-2xl mb-6">
-            Un espacio para compartir intereses, recuerdos, preguntas y posibilidades. No necesitamos llegar con una idea resuelta: vamos a descubrir qué podemos crear juntos.
+            Un espacio para compartir intereses, recuerdos, preguntas y posibilidades. Registra tu nombre y datos para conectar con la red de creadores y descubrir qué podemos crear juntos.
           </p>
 
           {/* Metadata badges */}
@@ -48,7 +68,7 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#dedbd3] bg-white text-xs font-semibold text-[#111111] shadow-2xs">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              No necesitas experiencia previa
+              Conexión para participantes
             </span>
           </div>
 
@@ -58,15 +78,24 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
               onClick={onScrollToForm}
               className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-extrabold rounded-full text-sm sm:text-base transition transform active:scale-98 shadow-sm cursor-pointer"
             >
-              <span>Compartir mis intereses</span>
+              <span>Registrarme y conectar</span>
               <ArrowDown className="w-4 h-4" />
             </button>
+            <a
+              href="https://chat.whatsapp.com/ErtCU75vz84H95zQ7Lj8rM"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-3.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold rounded-full text-sm sm:text-base transition shadow-xs cursor-pointer"
+            >
+              <span>WhatsApp del taller</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
             <button
-              onClick={onScrollToMap}
+              onClick={onScrollToNetwork}
               className="inline-flex items-center gap-2 px-5 py-3.5 bg-white hover:bg-stone-100 text-[#111111] border border-[#dedbd3] font-bold rounded-full text-sm sm:text-base transition cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-[#7656ff]" />
-              <span>Ver mapa colectivo ({totalContributions})</span>
+              <Users className="w-4 h-4 text-[#7656ff]" />
+              <span>Red ({totalContributions})</span>
             </button>
           </div>
         </div>
@@ -78,7 +107,6 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
             className="group relative bg-[#f8c300] text-[#111111] rounded-3xl p-7 sm:p-9 shadow-md border-2 border-[#111111] rotate-1 hover:rotate-0 transition-transform duration-300 cursor-pointer overflow-hidden flex flex-col justify-between min-h-[300px]"
             title="Haz clic para mutar los glifos creativos"
           >
-            {/* Background design accents */}
             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-32 h-32 bg-white/20 rounded-full blur-xl pointer-events-none" />
 
             <div className="flex items-center justify-between">
@@ -105,7 +133,7 @@ export const Hero: React.FC<HeroProps> = ({ onScrollToForm, onScrollToMap, total
 
             <div className="pt-4 border-t border-[#111111]/20 flex items-center justify-between text-xs font-semibold">
               <span>Núcleo Colectivo</span>
-              <span className="text-[#111111]/80">Taller participativo presencial</span>
+              <span className="text-[#111111]/80 font-mono">lab-colores.vercel.app</span>
             </div>
           </div>
         </div>
