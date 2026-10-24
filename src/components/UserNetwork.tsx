@@ -20,9 +20,10 @@ import {
 
 interface UserNetworkProps {
   contributions: ParticipantContribution[];
+  onOpenUserCard?: (user: ParticipantContribution) => void;
 }
 
-export const UserNetwork: React.FC<UserNetworkProps> = ({ contributions }) => {
+export const UserNetwork: React.FC<UserNetworkProps> = ({ contributions, onOpenUserCard }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLanguageFilter, setSelectedLanguageFilter] = useState<string>('todos');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('todos');
@@ -333,17 +334,29 @@ Recursos ofrecidos: ${user.resources || ''}`;
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => handleCopyContact(user)}
-                        className="p-2 rounded-lg text-stone-400 hover:text-stone-800 hover:bg-stone-200 transition cursor-pointer"
-                        title="Copiar datos de contacto"
-                      >
-                        {isCopied ? (
-                          <Check className="w-4 h-4 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-4 h-4" />
+                      <div className="flex items-center gap-1">
+                        {onOpenUserCard && (
+                          <button
+                            onClick={() => onOpenUserCard(user)}
+                            className="px-2 py-1 rounded-lg bg-stone-100 hover:bg-[#f8c300] text-stone-700 hover:text-[#111111] transition text-[11px] font-bold font-mono flex items-center gap-1 cursor-pointer border border-stone-200"
+                            title="Ver Carnet QR y Pase / Editar datos protegidos"
+                          >
+                            <span className="text-[10px]">✦</span>
+                            <span>Carnet QR</span>
+                          </button>
                         )}
-                      </button>
+                        <button
+                          onClick={() => handleCopyContact(user)}
+                          className="p-2 rounded-lg text-stone-400 hover:text-stone-800 hover:bg-stone-200 transition cursor-pointer"
+                          title="Copiar datos de contacto"
+                        >
+                          {isCopied ? (
+                            <Check className="w-4 h-4 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Location & Org Badges */}

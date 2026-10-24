@@ -16,6 +16,8 @@ export interface ParticipantContribution {
   wish: string;
   resources: string;
   createdAt: string;
+  pin?: string;
+  qrCodeData?: string;
 }
 
 export interface LanguageDefinition {
@@ -388,7 +390,9 @@ export const INITIAL_SEED_DATA: ParticipantContribution[] = [
     memory: "Exploración de la frontera entre el arte sensible y los modelos generativos de IA en comunidad.",
     wish: "Consolidar el Laboratorio de Medios Digitales e IA como un espacio vivo de co-creación y experimentación abierta.",
     resources: "Dirección creativa, diseño estratégico, programación, experimentación con IA y gestión comunitaria.",
-    createdAt: "2026-10-24T07:43:04.063Z"
+    createdAt: "2026-10-24T07:43:04.063Z",
+    pin: "1221",
+    qrCodeData: "nucleo://pass/1719820000000"
   }
 ];
 

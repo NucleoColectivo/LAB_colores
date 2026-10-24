@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
+import { GoogleGenAI } from '@google/genai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,9 +12,65 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'contributions.json');
 const DATA_ADVANCES_FILE = path.join(DATA_DIR, 'advances.json');
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+const DATA_PROJECT_FILE = path.join(DATA_DIR, 'creative-project.json');
+
+const DEFAULT_CREATIVE_PROJECT = {
+  id: "proj-manuel-oraculo",
+  title: "Oráculo Interactivo y Memoria Comunitaria",
+  author: "Manuel Palacio",
+  intention: "Explorar cómo la IA y el arte generativo pueden ser un espejo sensible de las memorias de un territorio sin despojarlo de su identidad.",
+  context: "Laboratorio de Medios Digitales e IA de Núcleo Colectivo, articulando artistas, educadores y tecnólogos.",
+  targetAudience: "Comunidades locales, creadores visuales, programadores creativos e investigadores de memoria.",
+  resources: "Laptops, navegadores web, modelos generativos, repositorio lab-colores.vercel.app y pantalla colectiva.",
+  desiredResult: "Un sistema vivo donde las voces se transforman en paisajes visuales e interrogantes poéticos compartidos.",
+  guidingQuestion: "¿De qué maneras la inteligencia artificial puede amplificar relatos comunitarios en lugar de estandarizarlos?",
+  activeStage: "comprender",
+  activeTools: ["01-explorador-ideas", "02-director-arte", "03-generador-imagenes", "05-disenador-interactivo"],
+  decisions: {
+    artDirection: {
+      aesthetic: "Fotografía documental poética combinada con arte generativo orgánico",
+      palette: ["#111111", "#f8c300", "#7656ff", "#f5f3ee"],
+      contrast: "Alto contraste y texturas terrosas con acentos luminosos vibrantes",
+      references: "Graciela Iturbide, Bill Viola, arte textil contemporáneo, p5.js generative shaders",
+      rules: "Evitar clichés de neon cyberpunk; priorizar rostros genuinos, manos trabajadoras y grano analógico 35mm"
+    },
+    imageParams: {
+      subject: "Retrato en primer plano de una persona mayor tejedora con filamentos de luz proyectados sobre sus manos",
+      cameraType: "35mm Film Camera (Hasselblad 500C / Kodak Portra 400)",
+      lens: "85mm f/1.4 Portrait Lens",
+      framing: "Medium Close-Up (MCU)",
+      angle: "Eye-level, íntimo y directo",
+      lighting: "Golden Hour natural lateral con suave rebote cálido",
+      depth: "Profundidad de campo corta (f/1.8), fondo sutilmente desenfocado",
+      aspectRatio: "16:9"
+    }
+  },
+  generatedOutputs: [],
+  updatedAt: new Date().toISOString()
+};
+
+function readCreativeProject(): any {
+  try {
+    if (fs.existsSync(DATA_PROJECT_FILE)) {
+      const content = fs.readFileSync(DATA_PROJECT_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (parsed && parsed.title) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error reading creative project file:', e);
+  }
+  fs.writeFileSync(DATA_PROJECT_FILE, JSON.stringify(DEFAULT_CREATIVE_PROJECT, null, 2), 'utf-8');
+  return DEFAULT_CREATIVE_PROJECT;
+}
+
+function writeCreativeProject(data: any): void {
+  try {
+    fs.writeFileSync(DATA_PROJECT_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Error writing creative project file:', e);
+  }
 }
 
 const DEFAULT_ADVANCES = [
@@ -57,7 +114,9 @@ const DEFAULT_CONTRIBUTIONS = [
     memory: "Exploración de la frontera entre el arte sensible y los modelos generativos de IA en comunidad.",
     wish: "Consolidar el Laboratorio de Medios Digitales e IA como un espacio vivo de co-creación y experimentación abierta.",
     resources: "Dirección creativa, diseño estratégico, programación, experimentación con IA y gestión comunitaria.",
-    createdAt: "2026-10-24T07:43:04.063Z"
+    createdAt: "2026-10-24T07:43:04.063Z",
+    pin: "1221",
+    qrCodeData: "nucleo://pass/1719820000000"
   }
 ];
 
@@ -212,6 +271,75 @@ async function startServer() {
   app.delete('/api/advances', (_req, res) => {
     writeAdvances([]);
     res.json({ success: true, message: 'Avances borrados del servidor' });
+  });
+
+  // API Route: GET /api/creative-system/project
+  app.get('/api/creative-system/project', (_req, res) => {
+    const project = readCreativeProject();
+    res.json(project);
+  });
+
+  // API Route: POST /api/creative-system/project
+  app.post('/api/creative-system/project', (req, res) => {
+    try {
+      const project = req.body;
+      if (!project || !project.title) {
+        res.status(400).json({ error: 'Título del proyecto es requerido' });
+        return;
+      }
+      project.updatedAt = new Date().toISOString();
+      writeCreativeProject(project);
+      res.json({ success: true, project });
+    } catch (err) {
+      console.error('Error saving creative project:', err);
+      res.status(500).json({ error: 'Error al guardar el proyecto' });
+    }
+  });
+
+  // API Route: POST /api/creative-system/assist
+  app.post('/api/creative-system/assist', async (req, res) => {
+    try {
+      const { toolId, masterPrompt, userQuery } = req.body;
+      const apiKey = process.env.GEMINI_API_KEY;
+
+      if (apiKey) {
+        try {
+          const ai = new GoogleGenAI({});
+          const systemInstruction = `Eres un socio creativo, director de arte y diseñador estratégico de Núcleo Colectivo (lab-colores.vercel.app), colaborando con Manuel y participantes del taller.
+Tu objetivo es traducir intenciones creativas en decisiones concretas, estéticas sofisticadas y prompts precisos para Midjourney v6, Runway Gen-3, p5.js, audio o código.
+Mantén tono cercano, poético, riguroso y anti-clichés de IA genérica. Estructura la salida con títulos claros en Markdown.`;
+
+          const response = await ai.models.generateContent({
+            model: 'gemini-3.8-flash',
+            contents: `${masterPrompt}\n\nConsulta o ajuste adicional del usuario: ${userQuery || 'Ninguno, procesar los parámetros.'}`,
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+            }
+          });
+
+          const text = response.text || '';
+          res.json({
+            success: true,
+            source: 'gemini-3.8-flash',
+            content: text
+          });
+          return;
+        } catch (apiErr) {
+          console.warn('[Gemini API] Error calling Gemini, falling back to structured assistant:', apiErr);
+        }
+      }
+
+      // Fallback response when no API key or on API failure
+      res.json({
+        success: true,
+        source: 'structured-template-engine',
+        content: null
+      });
+    } catch (err) {
+      console.error('Error in creative-system assist:', err);
+      res.status(500).json({ error: 'Error en la asistencia creativa' });
+    }
   });
 
   // Setup Vite in middleware mode for dev

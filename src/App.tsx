@@ -7,12 +7,14 @@ import { ParticipantForm } from './components/ParticipantForm';
 import { CollectiveMap } from './components/CollectiveMap';
 import { UserNetwork } from './components/UserNetwork';
 import { CreativeCrosses } from './components/CreativeCrosses';
+import { CreativeSystemSection } from './components/creativeSystem/CreativeSystemSection';
 import { CoCreationAdvances } from './components/CoCreationAdvances';
 import { ProjectorModal } from './components/ProjectorModal';
 import { WelcomeModal } from './components/WelcomeModal';
 import { SparkModal } from './components/SparkModal';
 import { NotificationToast } from './components/NotificationToast';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
+import { UserAuthProfileModal } from './components/UserAuthProfileModal';
 import { Footer } from './components/Footer';
 import {
   ParticipantContribution,
@@ -29,6 +31,7 @@ const STORAGE_KEY = 'nucleo-lab-aportes-v2';
 const ADVANCES_STORAGE_KEY = 'nucleo-lab-avances-v2';
 const NOTIFICATIONS_STORAGE_KEY = 'nucleo-lab-notifs-v2';
 const WELCOME_SEEN_KEY = 'nucleo-lab-welcome-seen-v1';
+const CURRENT_USER_KEY = 'nucleo-lab-current-user-id';
 
 // Demo entries that must be purged so only real participants + Manuel are shown
 const isDemoPerson = (name?: string) =>
@@ -91,9 +94,39 @@ export default function App() {
   const [isProjectorOpen, setIsProjectorOpen] = useState(false);
   const [isWelcomeOpen, setIsWelcomeOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  // Active current user state (defaults to Manuel Palacio or saved ID)
+  const [currentUserId, setCurrentUserId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(CURRENT_USER_KEY);
+      if (saved) return saved;
+    } catch {}
+    return '1719820000000';
+  });
+  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
+  const [userProfileTab, setUserProfileTab] = useState<'carnet' | 'edit' | 'switch'>('carnet');
+
   const lastSyncCount = useRef<number>(0);
   const knownAdvanceIds = useRef<Set<string>>(new Set(INITIAL_SEED_ADVANCES.map((a) => String(a.id))));
   const isFirstLoad = useRef(true);
+
+  // Determine current active user
+  const currentUser = useMemo(() => {
+    const found = contributions.find((c) => String(c.id) === String(currentUserId));
+    return found || contributions[0] || INITIAL_SEED_DATA[0];
+  }, [contributions, currentUserId]);
+
+  const handleSelectUser = (user: ParticipantContribution) => {
+    setCurrentUserId(String(user.id));
+    try {
+      localStorage.setItem(CURRENT_USER_KEY, String(user.id));
+    } catch {}
+  };
+
+  const handleOpenUserProfileModal = (tab: 'carnet' | 'edit' | 'switch' = 'carnet') => {
+    setUserProfileTab(tab);
+    setIsUserProfileOpen(true);
+  };
 
   // Save notifications to localStorage
   const saveNotifications = (newNotifs: SparkNotification[]) => {
@@ -295,12 +328,23 @@ export default function App() {
 
     await saveContributions(updated, newRecord);
 
+    // If new contribution was submitted, set as current user
+    setCurrentUserId(String(newRecord.id));
+    try {
+      localStorage.setItem(CURRENT_USER_KEY, String(newRecord.id));
+    } catch {}
+
     const networkSection = document.getElementById('comunidad');
     if (networkSection) {
       setTimeout(() => {
         networkSection.scrollIntoView({ behavior: 'smooth' });
       }, 350);
     }
+  };
+
+  const handleUpdateUserProfile = async (updatedUser: ParticipantContribution) => {
+    const updated = contributions.map((c) => (String(c.id) === String(updatedUser.id) ? updatedUser : c));
+    await saveContributions(updated, updatedUser);
   };
 
   const handleClearAll = async () => {
@@ -420,6 +464,8 @@ export default function App() {
         onOpenProjector={() => setIsProjectorOpen(true)}
         onOpenWelcome={() => setIsWelcomeOpen(true)}
         onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+        onOpenUserProfile={() => handleOpenUserProfileModal('carnet')}
+        currentUserName={currentUser.name || currentUser.alias}
         contributionCount={contributions.length}
         unreadNotificationCount={unreadNotificationCount}
       />
@@ -455,12 +501,24 @@ export default function App() {
         />
 
         {/* 03. RED DE CREADORES DEL TALLER (DIRECTORIO DE PARTICIPANTES) */}
-        <UserNetwork contributions={contributions} />
+        <UserNetwork
+          contributions={contributions}
+          onOpenUserCard={(user) => {
+            handleSelectUser(user);
+            handleOpenUserProfileModal('carnet');
+          }}
+        />
 
         {/* 04. CRUCES PARA IMAGINAR (LABORATORIO DE CRUCES CREATIVOS) */}
         <CreativeCrosses contributions={contributions} />
 
-        {/* 05. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
+        {/* 05. SISTEMA DE CREACIÓN ASISTIDA POR IA: DE LA INTENCIÓN A LA OBRA (lab-colores.vercel.app) */}
+        <CreativeSystemSection
+          onAddAdvance={handleAddAdvance}
+          onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+        />
+
+        {/* 06. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
         <CoCreationAdvances
           contributions={contributions}
           advances={advances}
@@ -482,19 +540,21 @@ export default function App() {
       />
 
       {/* Notification Center Drawer / Modal */}
-      <NotificationCenterModal
-        isOpen={isNotificationCenterOpen}
-        onClose={() => setIsNotificationCenterOpen(false)}
-        notifications={notifications}
-        onOpenSpark={handleOpenSparkFromNotification}
-        onMarkAsRead={handleMarkAsRead}
-        onMarkAllAsRead={handleMarkAllAsRead}
-        onClearAll={handleClearAllNotifications}
-        participantNames={participantNames}
-      />
+      {isNotificationCenterOpen && (
+        <NotificationCenterModal
+          isOpen={isNotificationCenterOpen}
+          onClose={() => setIsNotificationCenterOpen(false)}
+          notifications={notifications}
+          onOpenSpark={handleOpenSparkFromNotification}
+          onMarkAsRead={handleMarkAsRead}
+          onMarkAllAsRead={handleMarkAllAsRead}
+          onClearAll={handleClearAllNotifications}
+          participantNames={participantNames}
+        />
+      )}
 
       {/* Spark Modal opened from notification */}
-      {activeSparkData && (
+      {isSparkModalOpen && activeSparkData && (
         <SparkModal
           isOpen={isSparkModalOpen}
           onClose={() => {
@@ -507,16 +567,31 @@ export default function App() {
         />
       )}
 
-      <ProjectorModal
-        isOpen={isProjectorOpen}
-        onClose={() => setIsProjectorOpen(false)}
-        contributions={contributions}
-      />
+      {isProjectorOpen && (
+        <ProjectorModal
+          isOpen={isProjectorOpen}
+          onClose={() => setIsProjectorOpen(false)}
+          contributions={contributions}
+        />
+      )}
 
-      <WelcomeModal
-        isOpen={isWelcomeOpen}
-        onClose={handleCloseWelcome}
-        onStartParticipation={scrollToForm}
+      {isWelcomeOpen && (
+        <WelcomeModal
+          isOpen={isWelcomeOpen}
+          onClose={handleCloseWelcome}
+          onStartParticipation={scrollToForm}
+        />
+      )}
+
+      {/* User Identity, QR Carnet Pass & Protected Profile Editor */}
+      <UserAuthProfileModal
+        isOpen={isUserProfileOpen}
+        onClose={() => setIsUserProfileOpen(false)}
+        currentUser={currentUser}
+        allParticipants={contributions}
+        onSelectUser={handleSelectUser}
+        onUpdateUser={handleUpdateUserProfile}
+        initialTab={userProfileTab}
       />
     </div>
   );

@@ -1,0 +1,44 @@
+{
+  "id": "proj-manuel-oraculo",
+  "title": "Oráculo Interactivo y Memoria Comunitaria",
+  "author": "Manuel Palacio",
+  "intention": "Explorar cómo la IA y el arte generativo pueden ser un espejo sensible de las memorias de un territorio sin despojarlo de su identidad.",
+  "context": "Laboratorio de Medios Digitales e IA de Núcleo Colectivo, articulando artistas, educadores y tecnólogos.",
+  "targetAudience": "Comunidades locales, creadores visuales, programadores creativos e investigadores de memoria.",
+  "resources": "Laptops, navegadores web, modelos generativos, repositorio lab-colores.vercel.app y pantalla colectiva.",
+  "desiredResult": "Un sistema vivo donde las voces se transforman en paisajes visuales e interrogantes poéticos compartidos.",
+  "guidingQuestion": "¿De qué maneras la inteligencia artificial puede amplificar relatos comunitarios en lugar de estandarizarlos?",
+  "activeStage": "comprender",
+  "activeTools": [
+    "01-explorador-ideas",
+    "02-director-arte",
+    "03-generador-imagenes",
+    "05-disenador-interactivo"
+  ],
+  "decisions": {
+    "artDirection": {
+      "aesthetic": "Fotografía documental poética combinada con arte generativo orgánico",
+      "palette": [
+        "#111111",
+        "#f8c300",
+        "#7656ff",
+        "#f5f3ee"
+      ],
+      "contrast": "Alto contraste y texturas terrosas con acentos luminosos vibrantes",
+      "references": "Graciela Iturbide, Bill Viola, arte textil contemporáneo, p5.js generative shaders",
+      "rules": "Evitar clichés de neon cyberpunk; priorizar rostros genuinos, manos trabajadoras y grano analógico 35mm"
+    },
+    "imageParams": {
+      "subject": "Retrato en primer plano de una persona mayor tejedora con filamentos de luz proyectados sobre sus manos",
+      "cameraType": "35mm Film Camera (Hasselblad 500C / Kodak Portra 400)",
+      "lens": "85mm f/1.4 Portrait Lens",
+      "framing": "Medium Close-Up (MCU)",
+      "angle": "Eye-level, íntimo y directo",
+      "lighting": "Golden Hour natural lateral con suave rebote cálido",
+      "depth": "Profundidad de campo corta (f/1.8), fondo sutilmente desenfocado",
+      "aspectRatio": "16:9"
+    }
+  },
+  "generatedOutputs": [],
+  "updatedAt": "2026-10-24T08:43:25.543Z"
+}

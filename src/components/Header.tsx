@@ -1,11 +1,13 @@
 import React from 'react';
-import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle, Bell, Zap } from 'lucide-react';
+import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle, Bell, Zap, User, ShieldCheck } from 'lucide-react';
 import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
 interface HeaderProps {
   onOpenProjector: () => void;
   onOpenWelcome: () => void;
   onOpenNotifications: () => void;
+  onOpenUserProfile?: () => void;
+  currentUserName?: string;
   contributionCount: number;
   unreadNotificationCount: number;
 }
@@ -14,6 +16,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenProjector,
   onOpenWelcome,
   onOpenNotifications,
+  onOpenUserProfile,
+  currentUserName = 'Manuel Palacio',
   contributionCount,
   unreadNotificationCount
 }) => {
@@ -37,6 +41,17 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mobile controls */}
           <div className="flex items-center gap-1.5 md:hidden">
+            {onOpenUserProfile && (
+              <button
+                onClick={onOpenUserProfile}
+                className="flex items-center gap-1 px-2.5 py-1 bg-stone-800 hover:bg-[#f8c300] hover:text-[#111111] text-[#f8c300] border border-[#f8c300]/40 rounded-full text-xs font-mono font-bold transition cursor-pointer"
+                title="Mi Carnet QR y Datos Protegidos"
+                aria-label="Abrir Carnet QR"
+              >
+                <User className="w-3.5 h-3.5" />
+                <span className="max-w-[70px] truncate">{currentUserName.split(' ')[0]}</span>
+              </button>
+            )}
             <button
               onClick={onOpenNotifications}
               className="relative p-1.5 bg-stone-800 text-[#f8c300] rounded-full text-xs font-bold"
@@ -129,6 +144,14 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Cruces</span>
           </a>
           <a
+            href="#sistema-creativo"
+            className="px-2 py-1.5 rounded-lg text-white bg-white/10 hover:bg-[#f8c300] hover:text-[#111111] transition flex items-center gap-1 font-bold"
+            title="Sistema de Creación Asistida por IA: De la intención a la obra"
+          >
+            <Compass className="w-3.5 h-3.5 text-[#f8c300] group-hover:text-[#111111]" />
+            <span>Sistema Creativo</span>
+          </a>
+          <a
             href="#co-creacion"
             className="px-2 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold"
           >
@@ -158,6 +181,22 @@ export const Header: React.FC<HeaderProps> = ({
             <QrCode className="w-3.5 h-3.5 text-stone-300" />
             <span>QR & Chat</span>
           </a>
+
+          {/* User Profile & Carnet QR Button */}
+          {onOpenUserProfile && (
+            <button
+              onClick={onOpenUserProfile}
+              className="px-2.5 py-1 bg-stone-900 hover:bg-[#f8c300] hover:text-[#111111] text-[#f8c300] border border-[#f8c300]/40 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs group"
+              title="Ver mi Carnet QR de pase y editar mis datos personales protegidos"
+            >
+              <User className="w-3.5 h-3.5 text-[#f8c300] group-hover:text-[#111111]" />
+              <span className="hidden lg:inline">{currentUserName}</span>
+              <span className="lg:hidden">{currentUserName.split(' ')[0]}</span>
+              <span className="text-[10px] px-1 py-0.2 bg-[#f8c300]/20 group-hover:bg-[#111111]/20 rounded text-[#f8c300] group-hover:text-[#111111]">
+                QR
+              </span>
+            </button>
+          )}
 
           {/* WhatsApp Direct Group Link */}
           <a

@@ -127,6 +127,14 @@ export const Hero: React.FC<HeroProps> = ({
                 <span>Unir ideas y avances ↓</span>
               </button>
             )}
+
+            <a
+              href="#sistema-creativo"
+              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-[#f8c300]/20 hover:bg-[#f8c300]/35 text-[#111111] border border-[#f8c300] font-black rounded-full text-sm transition cursor-pointer"
+            >
+              <Compass className="w-4 h-4 text-[#111111]" />
+              <span>Sistema Creativo IA ↓</span>
+            </a>
           </div>
         </div>
 
