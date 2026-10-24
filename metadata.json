@@ -1,0 +1,6 @@
+{
+  "name": "Laboratorio de Ideas — Núcleo Colectivo",
+  "description": "Plataforma interactiva para talleres de co-creación artística, mapeo colectivo de afinidades y generación de cruces creativos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

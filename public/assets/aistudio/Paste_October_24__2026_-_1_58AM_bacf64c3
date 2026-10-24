@@ -1,0 +1,224 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>Laboratorio de ideas — Núcleo Colectivo</title>
+<style>
+:root{--ink:#111;--paper:#f5f3ee;--yellow:#f8c300;--violet:#7656ff;--pink:#ff4fa3;--muted:#6e6b66;--line:#dedbd3;--card:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Montserrat,Arial,sans-serif;line-height:1.45}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0;border-radius:999px;padding:12px 18px;background:var(--ink);color:#fff;font-weight:700}button.secondary{background:#e8e5de;color:var(--ink)}button.yellow{background:var(--yellow);color:var(--ink)}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--violet);outline-offset:2px}
+header{background:var(--ink);color:white;padding:18px clamp(18px,4vw,56px);display:flex;justify-content:space-between;gap:16px;align-items:center;position:sticky;top:0;z-index:5;border-bottom:4px solid var(--yellow)}.brand{font-weight:900;letter-spacing:.04em}.brand span{color:var(--yellow)}header nav{display:flex;gap:8px;flex-wrap:wrap}header nav a{color:white;text-decoration:none;font-size:.85rem;padding:8px}
+main{max-width:1180px;margin:auto;padding:24px clamp(16px,4vw,48px) 70px}.hero{padding:clamp(28px,6vw,70px) 0 34px;display:grid;grid-template-columns:1.35fr .65fr;gap:28px;align-items:center}.eyebrow{text-transform:uppercase;font-weight:800;letter-spacing:.13em;font-size:.75rem;color:#5e48d5}.hero h1{font-size:clamp(2.5rem,6vw,5.7rem);line-height:.96;letter-spacing:-.06em;margin:12px 0 20px;max-width:780px}.hero h1 em{font-style:normal;color:#6546ec}.hero p{font-size:1.1rem;max-width:680px;color:#45423d}.hero-art{background:var(--yellow);border-radius:28px;min-height:250px;padding:24px;display:flex;flex-direction:column;justify-content:space-between;transform:rotate(1deg)}.orb{font-size:5rem;line-height:1}.hero-art strong{font-size:1.6rem;max-width:260px;line-height:1.05}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.pill{display:inline-flex;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:.82rem;background:#fff}
+.section{margin-top:30px;scroll-margin-top:90px}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:16px}.section h2{font-size:clamp(1.7rem,3vw,2.6rem);letter-spacing:-.04em;margin:0}.section-head p{max-width:540px;margin:4px 0 0;color:var(--muted)}.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:clamp(18px,3vw,30px)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{border-radius:16px;padding:18px;background:#fff;border:1px solid var(--line)}.step b{display:block;font-size:1.15rem;margin:9px 0 5px}.num{font-size:.75rem;font-weight:900;color:#674ce6}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{margin-bottom:18px}.field label,.label{display:block;font-size:.9rem;font-weight:800;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;border:1px solid #c9c5bc;border-radius:12px;padding:12px 14px;background:#fff;color:var(--ink)}textarea{min-height:88px;resize:vertical}.hint{font-size:.82rem;color:var(--muted);margin-top:6px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.choice{position:relative;display:block;border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff;min-height:105px;cursor:pointer;transition:.15s}.choice:hover{border-color:var(--violet);transform:translateY(-2px)}.choice input{accent-color:var(--violet);margin-right:6px}.choice:has(input:checked){border:2px solid var(--violet);background:#f3f0ff;padding:13px}.choice strong{display:block;font-size:.95rem;margin:6px 0 3px}.choice small{display:block;color:var(--muted);font-size:.78rem}
+.tags{display:flex;flex-wrap:wrap;gap:7px}.tag{border-radius:999px;padding:6px 10px;background:#efede7;font-size:.82rem}.tag.purple{background:#eee9ff}.tag.yellow{background:#fff1a8}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.status{font-size:.85rem;color:var(--muted);margin-top:12px}.notice{border-left:4px solid var(--yellow);padding:12px 16px;background:#fff9db;border-radius:0 12px 12px 0;font-size:.9rem}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#111;color:white;border-radius:18px;padding:18px}.stat strong{font-size:2.3rem;display:block;line-height:1}.stat span{font-size:.82rem;color:#d6d2c9}
+.barrow{display:grid;grid-template-columns:minmax(100px,1fr) 2fr 34px;align-items:center;gap:10px;margin:10px 0;font-size:.88rem}.bar{height:10px;background:#e9e6df;border-radius:99px;overflow:hidden}.bar i{height:100%;display:block;background:var(--violet);border-radius:99px}
+.idea-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.idea{border:1px solid var(--line);background:#fff;border-radius:18px;padding:18px}.idea h3{margin:9px 0;font-size:1.15rem}.idea p{color:#514e49;font-size:.92rem}.idea .question{font-weight:800;color:#5c43d6}.idea button{margin-top:8px}
+.qr-layout{display:grid;grid-template-columns:1fr 250px;gap:24px;align-items:center}.qr-box{border:1px dashed #aaa;border-radius:18px;padding:18px;text-align:center;background:#faf9f6}.qr-box img{width:180px;height:180px;max-width:100%;display:block;margin:0 auto 10px}.qr-placeholder{height:180px;display:grid;place-items:center;font-size:.85rem;color:var(--muted)}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.time{border-top:4px solid var(--yellow);padding:12px 4px}.time strong{display:block;font-size:1.1rem}.time span{font-size:.83rem;color:var(--muted)}
+footer{background:#111;color:white;padding:28px clamp(18px,4vw,56px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}footer span{color:var(--yellow)}
+.hidden{display:none!important}.small{font-size:.8rem;color:var(--muted)}.divider{height:1px;background:var(--line);margin:22px 0}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.hero-art{min-height:180px}.steps{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.layout,.qr-layout{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(3,1fr)}.idea-list{grid-template-columns:1fr}.timeline{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}}
+@media(max-width:460px){.cards{grid-template-columns:1fr}.result-grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.hero h1{font-size:2.8rem}.barrow{grid-template-columns:100px 1fr 24px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">NÚCLEO <span>COLECTIVO</span> / LABORATORIO</div>
+  <nav aria-label="Navegación principal"><a href="#participar">Participar</a><a href="#mapa">Mapa colectivo</a><a href="#ideas">Ideas</a><a href="#conexion">Conectar</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Sesión 1 · Escuchar y enfocar</div>
+      <h1>Las ideas empiezan <em>con nosotros.</em></h1>
+      <p>Un espacio para compartir intereses, recuerdos, preguntas y posibilidades. No necesitamos llegar con una idea resuelta: vamos a descubrir qué podemos crear juntos.</p>
+      <div class="meta"><span class="pill">🕘 9:00 a. m. – 12:30 p. m.</span><span class="pill">🧭 Escuchar · Enfocar</span><span class="pill">✳ No necesitas experiencia previa</span></div>
+      <a href="#participar"><button class="yellow">Compartir mis intereses ↓</button></a>
+    </div>
+    <div class="hero-art"><div class="orb" aria-hidden="true">✳ ◉ ✦</div><strong>Crear con lo que tenemos. Imaginar lo que podemos ser.</strong><span>Núcleo Colectivo · Taller participativo</span></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div><h2>La ruta de la mañana</h2><p>Una conversación que se transforma en posibilidades concretas.</p></div></div>
+    <div class="steps">
+      <div class="step"><span class="num">01 / 9:00–9:25</span><b>Conocernos</b><span>Roles, expectativas y formas de participar.</span></div>
+      <div class="step"><span class="num">02 / 9:25–10:15</span><b>Reconocer</b><span>Intereses, experiencias, memorias e imágenes significativas.</span></div>
+      <div class="step"><span class="num">03 / 10:15–11:15</span><b>Explorar y cruzar</b><span>Lenguajes, referentes y conexiones entre intereses.</span></div>
+      <div class="step"><span class="num">04 / 11:15–12:30</span><b>Enfocar</b><span>Preguntas generadoras y elección de ideas individuales o colectivas.</span></div>
+    </div>
+    <p class="small">La agenda es una propuesta ajustable al ritmo y las necesidades del grupo.</p>
+  </section>
+
+  <section class="section" id="participar">
+    <div class="section-head"><div><h2>01. Cuéntanos de ti</h2><p>Completa esta ficha. Puedes responder sin compartir datos personales sensibles.</p></div><span class="pill">Participación · 3–5 min</span></div>
+    <div class="panel">
+      <form id="participantForm">
+        <div class="layout">
+          <div class="field"><label for="alias">¿Cómo te llamamos? (opcional)</label><input id="alias" maxlength="50" placeholder="Nombre o seudónimo"></div>
+          <div class="field"><label for="role">¿Desde dónde participas?</label><select id="role"><option value="">Elige una opción</option><option>Artista o creador/a</option><option>Estudiante</option><option>Docente o formador/a</option><option>Gestor/a cultural</option><option>Integrante de un colectivo</option><option>Curiosidad y ganas de explorar</option><option>Otra experiencia</option></select></div>
+        </div>
+        <div class="field"><label>¿Qué lenguajes creativos te interesan? <span class="small">(elige hasta 3)</span></label>
+          <div class="cards" id="languageChoices">
+            <label class="choice"><input type="checkbox" name="language" value="Imagen e ilustración"><strong>Imagen e ilustración</strong><small>Dibujo, collage, pintura, diseño</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Fotografía y memoria visual"><strong>Fotografía y memoria</strong><small>Retrato, archivo, fotomontaje</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Cómic y narrativas gráficas"><strong>Cómic y narrativas gráficas</strong><small>Personajes, viñetas, fanzine</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Video y audiovisual"><strong>Video y audiovisual</strong><small>Historias, cortos, documental, edición</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Experiencias inmersivas"><strong>Experiencias inmersivas</strong><small>Videoarte, proyección, mapping</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Sonido y música"><strong>Sonido y música</strong><small>Voz, ambientes, paisaje sonoro</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Arte interactivo"><strong>Arte interactivo</strong><small>Participación, sensores, instalaciones</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Programación creativa"><strong>Programación creativa</strong><small>Código, visuales generativas, datos</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="IA y experimentación"><strong>IA y experimentación</strong><small>Transformación de imagen, texto, video</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Instalación y objetos"><strong>Instalación y objetos</strong><small>Ensamblaje, espacio, exposición</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Cartografía y territorio"><strong>Cartografía y territorio</strong><small>Mapas afectivos, símbolos, lugares</small></label>
+            <label class="choice"><input type="checkbox" name="language" value="Futuros imaginados"><strong>Futuros imaginados</strong><small>Ficción, mundos posibles, especulación</small></label>
+          </div><div class="hint" id="languageCount" aria-live="polite">0 de 3 seleccionados.</div>
+        </div>
+        <div class="field"><label for="themes">¿Qué temas, lugares, recuerdos o preguntas te gustaría explorar?</label><textarea id="themes" maxlength="600" placeholder="Ej.: memorias del barrio, naturaleza, identidad, juventudes, sonidos cotidianos, futuros posibles…"></textarea></div>
+        <div class="field"><label for="memory">¿Hay una imagen, historia, sonido o experiencia que te haya marcado? (opcional)</label><textarea id="memory" maxlength="500" placeholder="Puedes describirla sin adjuntar archivos personales."></textarea></div>
+        <div class="field"><label for="wish">¿Qué te gustaría crear, expresar o compartir con otras personas?</label><textarea id="wish" maxlength="500" placeholder="Una idea inicial, aunque todavía no esté clara."></textarea></div>
+        <div class="field"><label for="resources">¿Con qué recursos o capacidades cuentas? (opcional)</label><input id="resources" maxlength="300" placeholder="Celular, dibujo, computador, voz, saberes, espacio, trabajo en equipo…"></div>
+        <div class="form-actions"><button type="submit" class="yellow">Sumar mi aporte al mapa</button><button type="button" class="secondary" id="clearForm">Limpiar ficha</button></div>
+        <p class="status" id="formStatus" aria-live="polite">En modo de prueba, las respuestas quedan guardadas solo en este navegador.</p>
+      </form>
+    </div>
+  </section>
+
+  <section class="section" id="mapa">
+    <div class="section-head"><div><h2>02. Mapa colectivo</h2><p>Observa qué lenguajes aparecen, qué temas se repiten y dónde pueden surgir cruces inesperados.</p></div><button class="secondary" id="refreshMap">Actualizar mapa</button></div>
+    <div class="result-grid">
+      <div class="stat"><strong id="totalCount">0</strong><span>aportes en este dispositivo</span></div>
+      <div class="stat"><strong id="languageTotal">0</strong><span>lenguajes diferentes elegidos</span></div>
+      <div class="stat"><strong id="themeTotal">0</strong><span>temas escritos</span></div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <div class="layout">
+        <div><h3>Lenguajes que nos convocan</h3><div id="languageBars"><p class="small">Cuando haya respuestas, aparecerán aquí las afinidades del grupo.</p></div></div>
+        <div><h3>Temas que están emergiendo</h3><div id="themeTags" class="tags"><span class="tag">Memoria</span><span class="tag">Territorio</span><span class="tag">Identidad</span><span class="tag">Futuros</span><span class="tag">Naturaleza</span></div><p class="small">Las etiquetas iniciales son disparadores, no conclusiones. El grupo puede proponer otras.</p></div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-actions"><button id="exportCsv">Exportar aportes (CSV)</button><button class="secondary" id="exportJson">Descargar respaldo JSON</button><button class="secondary" id="clearAll">Borrar datos de este navegador</button></div>
+      <p class="small">No exportes ni proyectes respuestas identificables sin permiso. Para uso colectivo, acuerden qué información desean compartir.</p>
+    </div>
+  </section>
+
+  <section class="section" id="ideas">
+    <div class="section-head"><div><h2>03. Cruces para imaginar</h2><p>La herramienta sugiere combinaciones a partir de los intereses seleccionados. Son puntos de partida para conversar, no decisiones automáticas.</p></div><button class="yellow" id="generateIdeas">Generar cruces</button></div>
+    <div class="panel">
+      <div class="layout">
+        <div class="field"><label for="focusTheme">Tema o necesidad que queremos explorar</label><input id="focusTheme" placeholder="Ej.: memorias, convivencia, agua, identidad…"></div>
+        <div class="field"><label for="audience">¿Con quién o para quién?</label><select id="audience"><option>La comunidad en general</option><option>Niños, niñas y adolescentes</option><option>Jóvenes</option><option>Personas mayores</option><option>Un colectivo cultural</option><option>Varias generaciones</option><option>Artistas y creadores</option></select></div>
+      </div>
+      <div class="field"><label for="challenge">¿Qué nos gustaría comprender, transformar o compartir?</label><textarea id="challenge" placeholder="Ej.: ¿Cómo podemos compartir las historias del barrio que casi nunca se escuchan?"></textarea></div>
+      <div id="ideaList" class="idea-list">
+        <article class="idea"><span class="tag purple">Ejemplo de cruce</span><h3>Memoria + fotografía + sonido</h3><p>Crear un archivo vivo de imágenes y voces del territorio.</p><p class="question">Pregunta: ¿Qué historias de nuestro entorno merecen ser escuchadas?</p><button class="secondary useIdea">Usar como punto de partida</button></article>
+        <article class="idea"><span class="tag yellow">Ejemplo de cruce</span><h3>Territorio + dibujo + mapa</h3><p>Construir una cartografía afectiva de lugares significativos.</p><p class="question">Pregunta: ¿Qué lugares cuentan quiénes somos?</p><button class="secondary useIdea">Usar como punto de partida</button></article>
+      </div>
+      <p class="status" id="ideaStatus" aria-live="polite">Selecciona intereses y pulsa “Generar cruces” para crear nuevas combinaciones.</p>
+    </div>
+  </section>
+
+  <section class="section" id="conexion">
+    <div class="section-head"><div><h2>04. Conectar al grupo</h2><p>Esta versión funciona como prototipo local. Aquí se prepara el acceso QR y se explica cómo habilitar aportes compartidos en tiempo real.</p></div></div>
+    <div class="panel qr-layout">
+      <div>
+        <h3>Acceso por QR</h3>
+        <p>Cuando publiques este HTML en una dirección web (por ejemplo, GitHub Pages, Netlify o Vercel), pega aquí la URL pública. El código QR abrirá esa dirección en los celulares.</p>
+        <div class="field"><label for="publicUrl">URL pública del taller</label><input id="publicUrl" type="url" placeholder="https://tu-sitio.netlify.app"></div>
+        <div class="form-actions"><button id="makeQr" class="yellow">Crear QR</button><button id="downloadQr" class="secondary">Descargar QR</button><button id="copyUrl" class="secondary">Copiar URL</button></div>
+        <p class="status" id="qrStatus" aria-live="polite">El QR requiere conexión a internet para generarse y escanearse.</p>
+      </div>
+      <div class="qr-box"><div id="qrOutput" class="qr-placeholder">El QR aparecerá aquí</div><strong>Escanea para participar</strong><p class="small">Puedes proyectarlo o imprimirlo.</p></div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <h3>¿Cómo hacemos que todas las respuestas se vean en vivo?</h3>
+      <ol>
+        <li>Publicar esta web en una URL pública.</li>
+        <li>Crear un proyecto en Firebase o Supabase y configurar una base de datos compartida.</li>
+        <li>Conectar el formulario y el mapa a esa base de datos, con reglas que limiten los datos que pueden leer o escribir los participantes.</li>
+        <li>Generar el QR con la URL publicada y probarlo desde varios celulares antes del taller.</li>
+      </ol>
+      <div class="notice"><strong>Importante:</strong> este archivo todavía no sincroniza automáticamente respuestas entre dispositivos. El modo actual guarda datos en el navegador que lo usa. Para una sesión con varios participantes, la conexión a una base de datos es el siguiente paso técnico; no conviene fingir que el QR por sí solo comparte la información.</div>
+    </div>
+  </section>
+</main>
+<footer><div><strong>NÚCLEO <span>COLECTIVO</span></strong><br>Crear con lo que tenemos. Imaginar lo que podemos ser.</div><div>Laboratorio de IA para Procesos Creativos<br><small>Sesión 1 · Escuchar para enfocar</small></div></footer>
+<script>
+const STORE='nucleo-lab-aportes-v1';
+const $=id=>document.getElementById(id);
+const getData=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'[]')}catch(e){return []}};
+const saveData=d=>localStorage.setItem(STORE,JSON.stringify(d));
+const languages=[...document.querySelectorAll('input[name="language"]')];
+languages.forEach(el=>el.addEventListener('change',()=>{
+ const checked=languages.filter(x=>x.checked);
+ if(checked.length>3){el.checked=false;$('languageCount').textContent='Puedes elegir máximo 3 lenguajes.';return}
+ $('languageCount').textContent=`${checked.length} de 3 seleccionados.`;
+}));
+$('participantForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const selected=languages.filter(x=>x.checked).map(x=>x.value);
+ if(!selected.length){$('formStatus').textContent='Selecciona al menos un lenguaje creativo para continuar.';return}
+ const record={id:Date.now(),alias:$('alias').value.trim(),role:$('role').value,languages:selected,themes:$('themes').value.trim(),memory:$('memory').value.trim(),wish:$('wish').value.trim(),resources:$('resources').value.trim(),createdAt:new Date().toISOString()};
+ const all=getData();all.push(record);saveData(all);
+ $('formStatus').textContent='¡Gracias! Tu aporte quedó guardado en este navegador. Para compartirlo con otros dispositivos hace falta activar la base de datos común.';
+ $('participantForm').reset();$('languageCount').textContent='0 de 3 seleccionados.';renderMap();
+});
+$('clearForm').addEventListener('click',()=>{$('participantForm').reset();$('languageCount').textContent='0 de 3 seleccionados.';$('formStatus').textContent='Ficha limpia.'});
+function renderMap(){
+ const data=getData(),counts={};let themeCount=0;const themeText=[];
+ data.forEach(r=>{(r.languages||[]).forEach(l=>counts[l]=(counts[l]||0)+1);if(r.themes){themeCount++;themeText.push(...r.themes.split(/[,;.\n]/).map(s=>s.trim()).filter(s=>s.length>2))}});
+ $('totalCount').textContent=data.length;$('languageTotal').textContent=Object.keys(counts).length;$('themeTotal').textContent=themeCount;
+ const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+ $('languageBars').innerHTML=sorted.length?sorted.map(([name,n])=>`<div class="barrow"><span>${esc(name)}</span><div class="bar"><i style="width:${Math.max(6,n/Math.max(...sorted.map(x=>x[1]))*100)}%"></i></div><b>${n}</b></div>`).join(''):'<p class="small">Cuando haya respuestas, aparecerán aquí las afinidades del grupo.</p>';
+ const words={};themeText.forEach(t=>{const k=t.toLocaleLowerCase('es');words[k]=(words[k]||0)+1});
+ const top=Object.entries(words).sort((a,b)=>b[1]-a[1]).slice(0,12);
+ $('themeTags').innerHTML=top.length?top.map(([t,n])=>`<span class="tag ${n>1?'purple':''}">${esc(t)}${n>1?' · '+n:''}</span>`).join(''):'<span class="tag">Aún no hay temas escritos</span>';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('refreshMap').addEventListener('click',renderMap);
+$('clearAll').addEventListener('click',()=>{if(confirm('¿Borrar todos los aportes guardados en este navegador? Esta acción no se puede deshacer.')){localStorage.removeItem(STORE);renderMap()}});
+function download(filename,text,type){const blob=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();URL.revokeObjectURL(a.href)}
+$('exportJson').addEventListener('click',()=>download('aportes-laboratorio.json',JSON.stringify(getData(),null,2),'application/json'));
+$('exportCsv').addEventListener('click',()=>{const rows=[['seudonimo','rol','lenguajes','temas','memoria','idea','recursos','fecha'],...getData().map(r=>[r.alias,r.role,(r.languages||[]).join(' | '),r.themes,r.memory,r.wish,r.resources,r.createdAt])];const csv=rows.map(row=>row.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('aportes-laboratorio.csv','\ufeff'+csv,'text/csv;charset=utf-8')});
+const crossTemplates=[
+ {match:['Fotografía y memoria visual','Sonido y música'],title:'Archivo vivo: imágenes que se escuchan',desc:'Combinar fotografías, relatos y paisajes sonoros para crear un archivo sensible del territorio.',q:'¿Qué historias de nuestro entorno merecen ser vistas y escuchadas?'},
+ {match:['Cartografía y territorio','Imagen e ilustración'],title:'Mapa de lugares significativos',desc:'Crear una cartografía colectiva con dibujos, recorridos, recuerdos y símbolos del territorio.',q:'¿Qué lugares cuentan quiénes somos y cómo los vivimos?'},
+ {match:['Video y audiovisual','Cómic y narrativas gráficas'],title:'Historias en movimiento',desc:'Pasar de viñetas o recuerdos a una secuencia audiovisual breve construida en grupo.',q:'¿Qué historia queremos contar desde nuestra propia mirada?'},
+ {match:['Arte interactivo','Programación creativa'],title:'Un espacio que responde',desc:'Imaginar una instalación sencilla donde la participación del público active imágenes, sonidos o mensajes.',q:'¿Cómo podría el espacio expresar algo que nos importa como comunidad?'},
+ {match:['IA y experimentación','Imagen e ilustración'],title:'Imágenes de lo posible',desc:'Explorar cómo transformar una idea visual con herramientas digitales o IA, manteniendo la decisión creativa en el grupo.',q:'¿Qué queremos imaginar que hoy todavía no existe?'},
+ {match:['Instalación y objetos','Fotografía y memoria visual'],title:'Museo de pequeñas memorias',desc:'Reunir objetos, fotografías y relatos para crear una muestra colectiva de memorias cotidianas.',q:'¿Qué objetos o imágenes guardan historias importantes para nosotros?'},
+ {match:['Futuros imaginados','Video y audiovisual'],title:'Postales desde el futuro',desc:'Crear piezas audiovisuales breves que imaginen futuros deseables o preguntas urgentes del territorio.',q:'¿Qué futuro nos gustaría hacer posible y qué tendríamos que cambiar?'},
+ {match:['Sonido y música','Video y audiovisual'],title:'Retratos sonoros del entorno',desc:'Registrar voces, ambientes y sonidos para construir una pieza audiovisual sobre un lugar o una experiencia.',q:'¿Cómo suena el lugar al que pertenecemos?'}
+];
+function generate(){
+ const chosen=languages.filter(x=>x.checked).map(x=>x.value),data=getData(),allChosen=[...new Set([...chosen,...data.flatMap(r=>r.languages||[])])];
+ const theme=$('focusTheme').value.trim()||data.map(r=>r.themes).filter(Boolean)[0]||'memorias y territorio';
+ const audience=$('audience').value;const challenge=$('challenge').value.trim();
+ let results=crossTemplates.filter(t=>t.match.some(m=>allChosen.includes(m)));
+ if(results.length<2)results=crossTemplates.slice(0,4);
+ results=results.slice(0,4);
+ $('ideaList').innerHTML=results.map((t,i)=>`<article class="idea"><span class="tag ${i%2?'yellow':'purple'}">Cruce posible ${i+1}</span><h3>${esc(t.title)}</h3><p>${esc(t.desc)} Público posible: ${esc(audience.toLowerCase())}. Tema a explorar: <strong>${esc(theme)}</strong>.</p><p class="question">Pregunta generadora: ${esc(challenge||t.q)}</p><button class="secondary useIdea" data-title="${esc(t.title)}" data-question="${esc(challenge||t.q)}">Elegir como punto de partida</button></article>`).join('');
+ $('ideaStatus').textContent='Ideas generadas a partir de los lenguajes elegidos y los temas disponibles. Conversen y adapten la propuesta antes de elegir.';
+ document.querySelectorAll('.useIdea').forEach(b=>b.addEventListener('click',()=>{const txt=`Idea: ${b.dataset.title}\nPregunta generadora: ${b.dataset.question}`;download('idea-para-conversar.txt',txt,'text/plain;charset=utf-8');$('ideaStatus').textContent='Idea descargada para conversar. Pueden editarla y acordar una versión colectiva.'}));
+}
+$('generateIdeas').addEventListener('click',generate);
+document.querySelectorAll('.useIdea').forEach(b=>b.addEventListener('click',()=>{const title=b.closest('.idea').querySelector('h3').textContent;const question=b.closest('.idea').querySelector('.question').textContent;$('focusTheme').value=title;$('challenge').value=question.replace('Pregunta:','').replace('Pregunta generadora:','').trim();$('ideaStatus').textContent='Idea trasladada al espacio de enfoque. Ajusten el tema y la pregunta entre todos.';document.querySelector('#ideas').scrollIntoView({behavior:'smooth'})}));
+let qrUrl='';
+$('makeQr').addEventListener('click',()=>{const u=$('publicUrl').value.trim();if(!/^https?:\/\/.+/i.test(u)){$('qrStatus').textContent='Pega primero una URL pública válida, que comience por https://';return}qrUrl=u;$('qrOutput').innerHTML=`<img alt="Código QR para abrir la web del taller" src="https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(u)}">`;$('qrStatus').textContent='QR generado para esta URL. Escanéalo con otro dispositivo antes de proyectarlo.'});
+$('downloadQr').addEventListener('click',()=>{const img=$('qrOutput').querySelector('img');if(!img){$('qrStatus').textContent='Primero crea el QR.';return}const a=document.createElement('a');a.href=img.src;a.download='qr-laboratorio.png';a.target='_blank';a.rel='noopener';a.click()});
+$('copyUrl').addEventListener('click',async()=>{const u=$('publicUrl').value.trim();if(!u){$('qrStatus').textContent='Pega una URL para copiarla.';return}try{await navigator.clipboard.writeText(u);$('qrStatus').textContent='URL copiada.'}catch(e){$('publicUrl').select();$('qrStatus').textContent='Selecciona y copia la URL manualmente.'}});
+renderMap();
+</script>
+</body>
+</html>'''
+path = Path("/mnt/data/laboratorio_ideas_nucleo_colectivo.html")
+path.write_text(html, encoding="utf-8")
+print(f"HTML creado: {path} ({path.stat().st_size:,} bytes)")
