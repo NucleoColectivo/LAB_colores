@@ -7,6 +7,7 @@ import { ParticipantForm } from './components/ParticipantForm';
 import { CollectiveMap } from './components/CollectiveMap';
 import { UserNetwork } from './components/UserNetwork';
 import { CreativeCrosses } from './components/CreativeCrosses';
+import { AiToolsSection } from './components/AiToolsSection';
 import { CreativeSystemSection } from './components/creativeSystem/CreativeSystemSection';
 import { CoCreationAdvances } from './components/CoCreationAdvances';
 import { ProjectorModal } from './components/ProjectorModal';
@@ -512,13 +513,16 @@ export default function App() {
         {/* 04. CRUCES PARA IMAGINAR (LABORATORIO DE CRUCES CREATIVOS) */}
         <CreativeCrosses contributions={contributions} />
 
-        {/* 05. SISTEMA DE CREACIÓN ASISTIDA POR IA: DE LA INTENCIÓN A LA OBRA (lab-colores.vercel.app) */}
+        {/* 05. CATÁLOGO DE HERRAMIENTAS IA POR TEMAS */}
+        <AiToolsSection />
+
+        {/* 06. SISTEMA DE CREACIÓN ASISTIDA POR IA: DE LA INTENCIÓN A LA OBRA (lab-colores.vercel.app) */}
         <CreativeSystemSection
           onAddAdvance={handleAddAdvance}
           onOpenNotifications={() => setIsNotificationCenterOpen(true)}
         />
 
-        {/* 06. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
+        {/* 07. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
         <CoCreationAdvances
           contributions={contributions}
           advances={advances}
