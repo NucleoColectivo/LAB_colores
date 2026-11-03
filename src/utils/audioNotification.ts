@@ -64,3 +64,45 @@ export function playSparkChime() {
     // Gracefully ignore audio errors (e.g. strict autoplay)
   }
 }
+
+export function playSprintBell() {
+  if (!soundEnabled) return;
+
+  try {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    if (!audioCtx) {
+      audioCtx = new AudioContextClass();
+    }
+
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const now = audioCtx.currentTime;
+    // Meditation bowl chord (E4, B4, E5) with warm decay
+    const freqs = [329.63, 493.88, 659.25];
+
+    freqs.forEach((freq, idx) => {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.15 - idx * 0.03, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 1.85);
+    });
+  } catch {
+    // Graceful fallback
+  }
+}

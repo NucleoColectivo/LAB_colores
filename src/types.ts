@@ -48,6 +48,8 @@ export interface WorkshopAdvance {
   milestone: string;
   status: 'boceto' | 'prototipo' | 'pruebas' | 'listo';
   mediaUrl?: string;
+  mediaType?: 'link' | 'image' | 'audio';
+  mediaData?: string; // base64 or object data for local sketches or audio notes
   createdAt: string;
 }
 
@@ -364,6 +366,8 @@ export const CROSS_TEMPLATES: CreativeCrossTemplate[] = [
     tagColor: 'purple'
   }
 ];
+
+export const CREATIVE_CROSS_TEMPLATES = CROSS_TEMPLATES;
 
 export const INITIAL_SEED_DATA: ParticipantContribution[] = [
   {

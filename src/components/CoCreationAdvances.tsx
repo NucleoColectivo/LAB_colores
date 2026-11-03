@@ -40,7 +40,17 @@ import {
   Clock,
   Trash2,
   Zap,
-  Bell
+  Bell,
+  Image as ImageIcon,
+  Music,
+  Volume2,
+  Play,
+  Pause,
+  UploadCloud,
+  FileAudio,
+  FileImage,
+  Maximize2,
+  X
 } from 'lucide-react';
 
 interface CoCreationAdvancesProps {
@@ -52,6 +62,49 @@ interface CoCreationAdvancesProps {
   onOpenNotifications?: () => void;
   unreadNotificationCount?: number;
 }
+
+// Lightweight audio player for soundscapes and voice notes in advances
+const InlineAudioPlayer: React.FC<{ src: string; title: string }> = ({ src, title }) => {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2.5 p-2.5 bg-[#111111] text-white rounded-xl text-xs border border-stone-800 shadow-sm my-2">
+      <audio
+        ref={audioRef}
+        src={src}
+        onEnded={() => setIsPlaying(false)}
+        onError={() => setIsPlaying(false)}
+      />
+      <button
+        type="button"
+        onClick={togglePlay}
+        className="w-8 h-8 rounded-lg bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] flex items-center justify-center font-bold transition cursor-pointer shrink-0"
+        title={isPlaying ? "Pausar audio" : "Reproducir paisaje sonoro"}
+      >
+        {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <span className="font-bold text-xs truncate block text-stone-100">
+          {title || "Archivo de Audio"}
+        </span>
+        <span className="text-[10px] text-[#f8c300] font-mono block">
+          {isPlaying ? "▶ Reproduciendo en vivo..." : "Paisaje sonoro / Nota de voz"}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   contributions,
@@ -83,7 +136,13 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
   const [milestone, setMilestone] = useState('');
   const [status, setStatus] = useState<'boceto' | 'prototipo' | 'pruebas' | 'listo'>('prototipo');
   const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaType, setMediaType] = useState<'link' | 'image' | 'audio'>('link');
+  const [mediaData, setMediaData] = useState<string>('');
+  const [mediaFileName, setMediaFileName] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Image Preview Modal
+  const [previewImageModal, setPreviewImageModal] = useState<string | null>(null);
 
   // Helper to render icon for the 10 thematic categories
   const renderCategoryIcon = (iconName: string, className = 'w-4 h-4') => {
@@ -245,6 +304,8 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
       milestone: milestone.trim() || 'Avance documentado durante la sesión del laboratorio.',
       status,
       mediaUrl: mediaUrl.trim() || OFFICIAL_WORKSHOP_URL,
+      mediaType,
+      mediaData: mediaData || undefined,
       createdAt: new Date().toISOString()
     };
 
@@ -274,7 +335,34 @@ export const CoCreationAdvances: React.FC<CoCreationAdvancesProps> = ({
     setCollectiveIntersection('');
     setMilestone('');
     setMediaUrl('');
+    setMediaType('link');
+    setMediaData('');
+    setMediaFileName('');
     setIsFormOpen(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMediaFileName(file.name);
+    const isAudio = file.type.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac)$/i.test(file.name);
+    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(file.name);
+
+    if (isAudio) {
+      setMediaType('audio');
+    } else if (isImage) {
+      setMediaType('image');
+    } else {
+      setMediaType('link');
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setMediaData(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   // Copy advance summary
@@ -823,18 +911,83 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                     className="w-full px-3 py-2 border border-[#7656ff] focus:ring-2 focus:ring-[#7656ff]/20 rounded-xl text-xs text-stone-800 bg-[#f9f8ff] outline-none resize-none"
                   />
                 </div>
-              ) : (
-                <div>
-                  <label className="block text-xs font-black uppercase text-stone-700 mb-1">
-                    Enlace de recurso / Demo / Repositorio (Opcional)
-                  </label>
+              ) : null}
+
+              <div className="space-y-1">
+                <label className="block text-xs font-black uppercase text-stone-700 mb-1">
+                  Enlace de recurso / Demo / Repositorio (Opcional)
+                </label>
+                <input
+                  type="url"
+                  value={mediaUrl}
+                  onChange={(e) => setMediaUrl(e.target.value)}
+                  placeholder="https://lab-colores.vercel.app/ o enlace a boceto..."
+                  className="w-full px-3 py-2 border border-[#c9c5bc] focus:border-[#7656ff] rounded-xl text-xs text-stone-800 bg-stone-50/50 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Multimedia Attachment: Audio or Image */}
+            <div className="p-3.5 bg-stone-50 border border-dashed border-stone-300 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between flex-wrap gap-1">
+                <span className="text-xs font-black uppercase text-stone-700 flex items-center gap-1.5">
+                  <UploadCloud className="w-4 h-4 text-[#7656ff]" />
+                  <span>Adjuntar Archivo Multimedia (Audio o Imagen Boceto)</span>
+                </span>
+                <span className="text-[10px] font-mono text-stone-500">
+                  .mp3, .wav, .m4a, .png, .jpg, .webp
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <label className="px-3.5 py-1.5 bg-white hover:bg-stone-100 text-stone-800 text-xs font-bold rounded-xl border border-stone-300 cursor-pointer shadow-2xs transition flex items-center gap-1.5">
+                  <UploadCloud className="w-3.5 h-3.5 text-[#7656ff]" />
+                  <span>Seleccionar archivo</span>
                   <input
-                    type="url"
-                    value={mediaUrl}
-                    onChange={(e) => setMediaUrl(e.target.value)}
-                    placeholder="https://lab-colores.vercel.app/ o enlace a boceto..."
-                    className="w-full px-3 py-2 border border-[#c9c5bc] focus:border-[#7656ff] rounded-xl text-xs text-stone-800 bg-stone-50/50 outline-none"
+                    type="file"
+                    accept="image/*,audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
                   />
+                </label>
+
+                {mediaFileName && (
+                  <div className="flex items-center gap-1.5 text-xs font-mono text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200">
+                    {mediaType === 'audio' ? (
+                      <FileAudio className="w-3.5 h-3.5 text-amber-500" />
+                    ) : (
+                      <FileImage className="w-3.5 h-3.5 text-[#7656ff]" />
+                    )}
+                    <span className="truncate max-w-xs">{mediaFileName}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMediaData('');
+                        setMediaFileName('');
+                        setMediaType('link');
+                      }}
+                      className="text-stone-400 hover:text-stone-700 ml-1 cursor-pointer font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Instant preview inside form */}
+              {mediaData && mediaType === 'image' && (
+                <div className="pt-1">
+                  <img
+                    src={mediaData}
+                    alt="Previsualización de boceto"
+                    className="h-20 w-auto rounded-lg border border-stone-300 object-cover shadow-2xs"
+                  />
+                </div>
+              )}
+
+              {mediaData && mediaType === 'audio' && (
+                <div className="pt-1">
+                  <InlineAudioPlayer src={mediaData} title={mediaFileName || "Nota sonora adjunta"} />
                 </div>
               )}
             </div>
@@ -1077,6 +1230,32 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
                       </strong>
                       <p>{adv.milestone}</p>
                     </div>
+
+                    {/* Attached Audio Player */}
+                    {adv.mediaData && (adv.mediaType === 'audio' || adv.mediaData.startsWith('data:audio')) && (
+                      <InlineAudioPlayer src={adv.mediaData} title={adv.title} />
+                    )}
+
+                    {/* Attached Image Thumbnail */}
+                    {adv.mediaData && (adv.mediaType === 'image' || adv.mediaData.startsWith('data:image')) && (
+                      <div className="relative group/img my-2.5 rounded-xl overflow-hidden border border-stone-300 max-h-48 bg-stone-100 flex items-center justify-center">
+                        <img
+                          src={adv.mediaData}
+                          alt={`Boceto de ${adv.title}`}
+                          className="w-full h-auto max-h-48 object-cover cursor-pointer hover:scale-102 transition duration-300"
+                          onClick={() => setPreviewImageModal(adv.mediaData!)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPreviewImageModal(adv.mediaData!)}
+                          className="absolute bottom-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-lg text-xs opacity-0 group-hover/img:opacity-100 transition cursor-pointer flex items-center gap-1 font-mono"
+                          title="Ampliar boceto"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                          <span>Ver</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Footer with repo URL & Spark button */}
@@ -1131,6 +1310,30 @@ _Documento generado automáticamente para sincronización con [${OFFICIAL_WORKSH
         sourceTitle={sparkSourceTitle}
         sourceContext={sparkSourceContext}
       />
+
+      {/* LIGHTBOX MODAL FOR ATTACHED SKETCHES / SCREENSHOTS */}
+      {previewImageModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setPreviewImageModal(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] flex flex-col items-center">
+            <button
+              onClick={() => setPreviewImageModal(null)}
+              className="absolute -top-10 right-0 p-1.5 rounded-full bg-white/20 hover:bg-white/40 text-white transition cursor-pointer"
+              aria-label="Cerrar vista de imagen"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img
+              src={previewImageModal}
+              alt="Boceto ampliado"
+              className="max-h-[82vh] max-w-full rounded-2xl object-contain shadow-2xl border border-stone-800"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

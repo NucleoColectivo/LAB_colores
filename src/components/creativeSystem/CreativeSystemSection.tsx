@@ -589,7 +589,7 @@ export const CreativeSystemSection: React.FC<CreativeSystemSectionProps> = ({
             }`}
           >
             <Zap className="w-4 h-4 text-[#f8c300]" />
-            <span>05. IA Gratis & Ensayos</span>
+            <span>05. Biblioteca de Herramientas IA</span>
           </button>
         </div>
       </div>

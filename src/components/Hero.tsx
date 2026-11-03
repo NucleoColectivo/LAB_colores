@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2, Globe, Users, ExternalLink, QrCode, Smartphone } from 'lucide-react';
+import { ArrowDown, Clock, Compass, Sparkles, CheckCircle2, Globe, Users, ExternalLink, QrCode, Smartphone, Cpu } from 'lucide-react';
 import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
 interface HeroProps {
@@ -134,6 +134,14 @@ export const Hero: React.FC<HeroProps> = ({
             >
               <Compass className="w-4 h-4 text-[#111111]" />
               <span>Sistema Creativo IA ↓</span>
+            </a>
+
+            <a
+              href="#biblioteca-ia"
+              className="inline-flex items-center gap-2 px-4 py-3.5 bg-stone-900 hover:bg-[#7656ff] text-white font-bold rounded-full text-sm transition cursor-pointer shadow-xs"
+            >
+              <Cpu className="w-4 h-4 text-[#f8c300]" />
+              <span>Biblioteca IA (30) ↓</span>
             </a>
           </div>
         </div>

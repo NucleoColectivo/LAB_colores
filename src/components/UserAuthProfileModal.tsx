@@ -21,7 +21,8 @@ import {
   Edit3,
   User,
   BadgeCheck,
-  Smartphone
+  Smartphone,
+  Printer
 } from 'lucide-react';
 import { ParticipantContribution, CREATIVE_LANGUAGES } from '../types';
 
@@ -437,9 +438,19 @@ export const UserAuthProfileModal: React.FC<UserAuthProfileModalProps> = ({
                   ) : (
                     <>
                       <Copy className="w-4 h-4 text-[#f8c300]" />
-                      <span>Copiar Datos del Carnet</span>
+                      <span>Copiar Datos</span>
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="py-2.5 px-3.5 bg-stone-900 hover:bg-stone-800 text-[#f8c300] font-bold rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer border border-[#f8c300]/50"
+                  title="Imprimir credencial o gafete físico de taller"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimir Gafete</span>
                 </button>
 
                 <button
@@ -449,8 +460,78 @@ export const UserAuthProfileModal: React.FC<UserAuthProfileModalProps> = ({
                   className="flex-1 py-2.5 px-4 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md cursor-pointer"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Modificar mis Datos (PIN)</span>
+                  <span>Modificar Datos (PIN)</span>
                 </button>
+              </div>
+
+              {/* Printable Physical Badge (Visible during window.print()) */}
+              <div id="printable-workshop-badge" className="hidden print:block">
+                <style>{`
+                  @media print {
+                    body * { visibility: hidden !important; }
+                    #printable-workshop-badge, #printable-workshop-badge * { visibility: visible !important; }
+                    #printable-workshop-badge {
+                      position: fixed;
+                      top: 40px;
+                      left: 50%;
+                      transform: translateX(-50%);
+                      width: 90mm;
+                      height: 60mm;
+                      padding: 4mm;
+                      border: 2px dashed #000;
+                      border-radius: 4mm;
+                      background: #ffffff !important;
+                      color: #000000 !important;
+                      font-family: sans-serif;
+                      box-sizing: border-box;
+                    }
+                  }
+                `}</style>
+                <div className="h-full flex flex-col justify-between border-2 border-black p-2 rounded-lg bg-white text-black">
+                  <div className="flex items-center justify-between border-b-2 border-black pb-1">
+                    <div>
+                      <strong className="text-xs uppercase tracking-wider block font-black">
+                        NÚCLEO COLECTIVO
+                      </strong>
+                      <span className="text-[8px] uppercase tracking-widest block font-mono">
+                        LABORATORIO DE MEDIOS DIGITALES E IA
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-black border border-black px-1.5 py-0.2 rounded font-mono">
+                      PASE #{String(currentUser.id).slice(-4)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 my-1">
+                    <div className="p-1 border-2 border-black rounded shrink-0">
+                      <svg viewBox="0 0 25 25" className="w-16 h-16" shapeRendering="crispEdges">
+                        {qrMatrix.map((row, y) =>
+                          row.map((filled, x) =>
+                            filled ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#000" /> : null
+                          )
+                        )}
+                      </svg>
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-base font-black leading-tight text-black truncate">
+                        {currentUser.name}
+                      </h4>
+                      <p className="text-[10px] font-bold text-black/80 font-mono">
+                        {currentUser.role}
+                      </p>
+                      {currentUser.phone && (
+                        <p className="text-[9px] font-mono text-black/70">
+                          Tel: {currentUser.phone}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-black pt-1 flex items-center justify-between text-[8px] font-mono text-black/80">
+                    <span>lab-colores.vercel.app</span>
+                    <span>Medellín · 2026</span>
+                  </div>
+                </div>
               </div>
 
               {/* Security info card */}
