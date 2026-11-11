@@ -53,7 +53,7 @@ export const VisualPromptLab:React.FC=()=>{
  const [selected,setSelected]=useState<string[]>([]); const [favorites,setFavorites]=useState<string[]>(()=>readStore('vpl-favorites'));
  const [copied,setCopied]=useState(''); const [language,setLanguage]=useState<'es'|'en'>('es');
  const filtered=useMemo(()=>entries.filter(e=>(mode==='all'||e.mode===mode||e.mode==='both')&&(category==='Todas'||e.category===category)&&(!query||[e.name,e.command,e.description,e.category,...e.tags].join(' ').toLowerCase().includes(query.toLowerCase()))),[mode,category,query]);
- const prompt=selected.map(id=>{const e=entries.find(x=>x.id===id)!;return e.example}).join(', ');
+ const prompt=selected.map(id=>{const e=entries.find(x=>x.id===id)!;return language==='es'?e.description:e.example}).join(language==='es'?'. ':' ');
  const copy=async(text:string,id:string)=>{try{await navigator.clipboard.writeText(text);setCopied(id);window.setTimeout(()=>setCopied(''),1600)}catch{setCopied('error')}};
  const toggle=(id:string)=>setSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);
  const toggleFav=(id:string)=>setFavorites(s=>{const n=s.includes(id)?s.filter(x=>x!==id):[...s,id];localStorage.setItem('vpl-favorites',JSON.stringify(n));return n});
