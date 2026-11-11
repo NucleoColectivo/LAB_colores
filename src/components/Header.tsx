@@ -163,6 +163,14 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
           </a>
           <a
+            href="#visual-prompt-lab"
+            className="px-2.5 py-1.5 rounded-lg text-[#b7ff4a] bg-[#b7ff4a]/10 hover:bg-[#b7ff4a] hover:text-[#111111] border border-[#b7ff4a]/30 transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0"
+            title="Biblioteca interactiva de fotografía y cinematografía"
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            <span>Visual Prompt Lab</span>
+          </a>
+          <a
             href="#co-creacion"
             className="px-2 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0"
           >
