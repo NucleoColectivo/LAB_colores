@@ -4,6 +4,7 @@ import {
   Video, AudioLines, Code2, Gamepad2, Megaphone, Workflow, Database,
   ExternalLink, X, SlidersHorizontal, Lightbulb, GraduationCap, Clock3
 } from 'lucide-react';
+import { ToolLogo } from './common/ToolLogo';
 
 type Tool = {
   name: string;
@@ -48,11 +49,14 @@ const categories: Category[] = [
     color: 'violet',
     tools: [
       { name: 'NotebookLM', url: 'https://notebooklm.google.com/', description: 'Trabaja con fuentes propias y responde preguntas fundamentadas en los documentos que agregas.', uses: ['Consultar documentos', 'Comparar fuentes', 'Preparar guías y resúmenes'], level: 'Inicial', access: 'Freemium', featured: true },
+      { name: 'Google AI Studio', url: 'https://aistudio.google.com/', description: 'Entorno de Google para probar modelos Gemini avanzados y procesar documentos extensos.', uses: ['Probar modelos Gemini', 'Ajustar prompts de sistema', 'Procesar textos y memoria'], level: 'Intermedio', access: 'Gratis', featured: true },
+      { name: 'Gemini', url: 'https://gemini.google.com/', description: 'Asistente multimodal en tiempo real para ideación, análisis de imágenes y redacción.', uses: ['Analizar imágenes y bocetos', 'Lluvia de ideas', 'Sintetizar textos'], level: 'Inicial', access: 'Gratis' },
+      { name: 'DeepSeek', url: 'https://chat.deepseek.com/', description: 'Modelo de razonamiento abierto para análisis profundo, lógica y programación.', uses: ['Razonamiento detallado', 'Lógica de proyecto', 'Estructuración'], level: 'Inicial', access: 'Gratis' },
+      { name: 'Claude', url: 'https://claude.ai/', description: 'Apoya la lectura, síntesis, escritura y análisis de documentos extensos.', uses: ['Resumir textos', 'Comparar documentos', 'Estructurar informes'], level: 'Inicial', access: 'Freemium' },
       { name: 'Perplexity', url: 'https://www.perplexity.ai/', description: 'Investiga en la web y presenta respuestas acompañadas de referencias.', uses: ['Explorar temas', 'Localizar fuentes', 'Contrastar información'], level: 'Inicial', access: 'Freemium' },
-      { name: 'Google Drive', url: 'https://drive.google.com/', description: 'Almacena y organiza documentos, hojas de cálculo, imágenes y materiales de trabajo.', uses: ['Organizar archivos', 'Compartir carpetas', 'Colaborar en documentos'], level: 'Inicial', access: 'Freemium' },
-      { name: 'Claude', url: 'https://claude.ai/', description: 'Apoya la lectura, síntesis, escritura y análisis de documentos extensos.', uses: ['Resumir textos', 'Comparar documentos', 'Estructurar informes'], level: 'Inicial', access: 'Freemium' }
+      { name: 'Google Drive', url: 'https://drive.google.com/', description: 'Almacena y organiza documentos, hojas de cálculo, imágenes y materiales de trabajo.', uses: ['Organizar archivos', 'Compartir carpetas', 'Colaborar en documentos'], level: 'Inicial', access: 'Freemium' }
     ],
-    exercise: 'Crea una carpeta temática en Drive, selecciona documentos públicos y trabaja con ellos en NotebookLM para construir una guía de consulta con fuentes verificables.'
+    exercise: 'Crea una carpeta temática en Drive, selecciona documentos públicos y trabaja con ellos en NotebookLM o Google AI Studio para construir una guía de consulta con fuentes verificables.'
   },
   {
     id: 'diseno',
@@ -64,6 +68,8 @@ const categories: Category[] = [
       { name: 'Canva', url: 'https://www.canva.com/', description: 'Diseña presentaciones, carteles, publicaciones, documentos y piezas para redes.', uses: ['Crear piezas gráficas', 'Diseñar catálogos', 'Preparar presentaciones'], level: 'Inicial', access: 'Freemium', featured: true },
       { name: 'Adobe Firefly', url: 'https://firefly.adobe.com/', description: 'Genera y edita imágenes y recursos visuales mediante instrucciones.', uses: ['Explorar conceptos visuales', 'Crear fondos', 'Editar imágenes'], level: 'Inicial', access: 'Freemium' },
       { name: 'Ideogram', url: 'https://ideogram.ai/', description: 'Genera imágenes y explora composiciones con texto integrado.', uses: ['Afiches conceptuales', 'Exploración tipográfica', 'Imágenes para campañas'], level: 'Inicial', access: 'Freemium' },
+      { name: 'Leonardo.Ai', url: 'https://leonardo.ai/', description: 'Suite de arte conceptual e ilustración con 150 créditos diarios gratuitos renovables.', uses: ['Ilustración conceptual', 'Texturas visuales', 'Generar series'], level: 'Inicial', access: 'Freemium' },
+      { name: 'Krea.ai / FLUX', url: 'https://www.krea.ai/', description: 'Generación visual en tiempo real y reescalado fotográfico de alta fidelidad.', uses: ['Lienzo en tiempo real', 'Reescalar imágenes', 'Bocetos interactivos'], level: 'Inicial', access: 'Freemium' },
       { name: 'Adobe Express', url: 'https://www.adobe.com/express/', description: 'Crea y adapta contenidos gráficos y audiovisuales para diferentes formatos.', uses: ['Piezas para redes', 'Adaptar formatos', 'Videos cortos'], level: 'Inicial', access: 'Freemium' }
     ],
     exercise: 'Elige un producto, actividad o servicio y crea una presentación visual breve con portada, propuesta de valor, imágenes y datos de contacto.'
@@ -77,6 +83,7 @@ const categories: Category[] = [
     tools: [
       { name: 'Google Flow', url: 'https://labs.google/fx/tools/flow', description: 'Explora generación audiovisual con IA a partir de instrucciones y recursos visuales.', uses: ['Crear escenas', 'Animar ideas', 'Experimentar con narrativas'], level: 'Intermedio', access: 'Freemium', featured: true },
       { name: 'Runway', url: 'https://runwayml.com/', description: 'Genera y transforma video con herramientas de inteligencia artificial.', uses: ['Generar clips', 'Transformar escenas', 'Experimentar con movimiento'], level: 'Intermedio', access: 'Freemium' },
+      { name: 'Kling AI', url: 'https://klingai.com/', description: 'Generador de video con 66 créditos diarios gratuitos renovables y alta fidelidad física.', uses: ['Tomas cinematográficas', 'Movimiento natural', 'Planos de 5s'], level: 'Intermedio', access: 'Freemium', featured: true },
       { name: 'CapCut', url: 'https://www.capcut.com/', description: 'Edita videos, agrega subtítulos, música y recursos para redes sociales.', uses: ['Editar reels', 'Subtitular', 'Montar campañas'], level: 'Inicial', access: 'Freemium' },
       { name: 'HeyGen', url: 'https://www.heygen.com/', description: 'Crea videos explicativos con presentadores virtuales y doblaje.', uses: ['Videos informativos', 'Presentaciones habladas', 'Traducción audiovisual'], level: 'Intermedio', access: 'Freemium' }
     ],
@@ -91,6 +98,7 @@ const categories: Category[] = [
     tools: [
       { name: 'ElevenLabs', url: 'https://elevenlabs.io/', description: 'Genera narraciones, voces sintéticas y recursos de audio.', uses: ['Narrar textos', 'Crear voces para videos', 'Explorar doblaje'], level: 'Inicial', access: 'Freemium', featured: true },
       { name: 'Suno', url: 'https://suno.com/', description: 'Experimenta con la creación de canciones y piezas musicales mediante IA.', uses: ['Bocetos musicales', 'Canciones originales', 'Exploración sonora'], level: 'Inicial', access: 'Freemium' },
+      { name: 'Udio', url: 'https://www.udio.com/', description: 'Producción de paisajes sonoros y música ambiental de alta fidelidad acústica.', uses: ['Paisajes sonoros', 'Ambientes cotidianos', 'Texturas sonoras'], level: 'Intermedio', access: 'Freemium' },
       { name: 'Adobe Podcast', url: 'https://podcast.adobe.com/', description: 'Mejora la claridad de grabaciones de voz y prepara audio hablado.', uses: ['Limpiar entrevistas', 'Mejorar voz', 'Preparar podcasts'], level: 'Inicial', access: 'Freemium' }
     ],
     exercise: 'Convierte un texto propio en un guion narrado. Prueba una voz sintética o graba tu voz y mejora el audio. La clonación requiere autorización expresa.'
@@ -103,7 +111,9 @@ const categories: Category[] = [
     color: 'blue',
     tools: [
       { name: 'Lovable', url: 'https://lovable.dev/', description: 'Construye prototipos de aplicaciones y sitios describiendo lo que necesitas.', uses: ['Crear interfaces', 'Prototipar productos', 'Conectar servicios'], level: 'Intermedio', access: 'Freemium', featured: true },
-      { name: 'Bolt', url: 'https://bolt.new/', description: 'Crea y prueba aplicaciones web a partir de instrucciones conversacionales.', uses: ['Prototipos web', 'Interfaces funcionales', 'Experimentos rápidos'], level: 'Intermedio', access: 'Freemium' },
+      { name: 'Bolt', url: 'https://bolt.new/', description: 'Crea y prueba aplicaciones web a partir de instrucciones conversacionales.', uses: ['Prototipos web', 'Interfaces funcionales', 'Experimentos rápidos'], level: 'Intermedio', access: 'Freemium', featured: true },
+      { name: 'v0 by Vercel', url: 'https://v0.dev/', description: 'Genera interfaces de usuario y componentes interactivos modulares con IA.', uses: ['Interfaces Tailwind', 'Componentes UI', 'Maquetas funcionales'], level: 'Intermedio', access: 'Freemium' },
+      { name: 'p5.js Web Editor', url: 'https://editor.p5js.org/', description: 'Editor web de código libre para arte generativo, matemáticas y visuales interactivos.', uses: ['Visuales de código', 'Partículas reactivas', 'Interacción con mouse'], level: 'Inicial', access: 'Gratis' },
       { name: 'Replit', url: 'https://replit.com/', description: 'Programa, ejecuta y publica proyectos desde un entorno en línea.', uses: ['Desarrollar aplicaciones', 'Probar código', 'Publicar prototipos'], level: 'Intermedio', access: 'Freemium' },
       { name: 'Cursor', url: 'https://cursor.com/', description: 'Editor de código con asistencia de IA para comprender y desarrollar proyectos.', uses: ['Programar', 'Revisar código', 'Mantener proyectos'], level: 'Avanzado', access: 'Freemium' }
     ],
@@ -259,59 +269,165 @@ export const AiToolsSection: React.FC = () => {
                   <p className="text-sm text-[#6e6b66] mt-0.5">{category.subtitle}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5">
                 {category.tools.map(tool => (
-                  <div key={tool.name} className="bg-white border border-[#dedbd3] rounded-2xl p-4 flex flex-col min-h-[215px] hover:border-[#7656ff] hover:shadow-sm transition">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <span className="text-[10px] uppercase tracking-wider text-[#6e6b66] font-bold">{category.title}</span>
-                      {tool.featured && <span className="text-[9px] px-2 py-1 rounded-full bg-[#fff4c2] text-[#816100] font-black">RECOMENDADA</span>}
+                  <div
+                    key={tool.name}
+                    className="bg-white border-2 border-[#dedbd3] rounded-2xl p-4 sm:p-5 flex flex-col justify-between hover:border-[#111111] hover:shadow-md transition-all group"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <ToolLogo name={tool.name} size="md" />
+                          <div className="min-w-0">
+                            <h4 className="font-black text-base sm:text-lg leading-tight text-[#111111] truncate">
+                              {tool.name}
+                            </h4>
+                            <span className="text-[11px] font-mono text-stone-400 block truncate">
+                              {tool.access} · {tool.level}
+                            </span>
+                          </div>
+                        </div>
+                        {tool.featured && (
+                          <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded bg-[#f8c300] text-[#111111] shrink-0">
+                            PROBADA
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-[#5c5851] leading-relaxed line-clamp-3 mb-3">
+                        {tool.description}
+                      </p>
                     </div>
-                    <h4 className="font-black text-lg leading-tight">{tool.name}</h4>
-                    <p className="text-xs text-[#5c5851] leading-relaxed mt-2 flex-1">{tool.description}</p>
-                    <div className="flex flex-wrap gap-1.5 mt-3">
-                      <span className="text-[10px] rounded-full bg-stone-100 px-2 py-1 text-stone-600">{tool.level}</span>
-                      <span className="text-[10px] rounded-full bg-stone-100 px-2 py-1 text-stone-600">{tool.access}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 border-t border-stone-100 mt-3 pt-3">
-                      <button onClick={() => setActiveTool(tool)} className="text-xs font-bold text-[#5e48d5] hover:text-[#111]">Ver ficha</button>
-                      <a href={tool.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#111] hover:text-[#7656ff]">Abrir herramienta <ArrowUpRight className="w-3.5 h-3.5" /></a>
+
+                    <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2 text-xs">
+                      <button
+                        onClick={() => setActiveTool(tool)}
+                        className="font-bold text-[#5e48d5] hover:text-[#111] cursor-pointer"
+                      >
+                        Ver ficha
+                      </button>
+                      <a
+                        href={tool.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-bold text-[#111] hover:text-[#7656ff]"
+                      >
+                        <span>Abrir app</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </a>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 rounded-xl bg-[#f0eee8] p-4 flex gap-3">
+              <div className="mt-3 rounded-2xl bg-[#f0eee8] border border-stone-200 p-4 flex gap-3">
                 <GraduationCap className="w-5 h-5 text-[#5e48d5] shrink-0 mt-0.5" />
-                <div><p className="text-xs font-black uppercase tracking-wider mb-1">Prueba sugerida</p><p className="text-sm text-[#45423d] leading-relaxed">{category.exercise}</p></div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-wider mb-1 text-stone-900">
+                    Prueba práctica sugerida
+                  </p>
+                  <p className="text-xs sm:text-sm text-[#45423d] leading-relaxed">
+                    {category.exercise}
+                  </p>
+                </div>
               </div>
             </article>
           );
         })}
-        {filteredCategories.length === 0 && <div className="text-center py-12 bg-white rounded-2xl border border-[#dedbd3]"><Search className="w-7 h-7 mx-auto text-stone-400 mb-2" /><p className="font-bold">No encontramos herramientas con esa búsqueda.</p><button onClick={() => { setQuery(''); setActiveCategory('todos'); }} className="mt-2 text-sm font-bold text-[#5e48d5]">Limpiar filtros</button></div>}
+        {filteredCategories.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-2xl border-2 border-[#dedbd3]">
+            <Search className="w-7 h-7 mx-auto text-stone-400 mb-2" />
+            <p className="font-bold text-stone-800">No encontramos herramientas con esa búsqueda.</p>
+            <button
+              onClick={() => { setQuery(''); setActiveCategory('todos'); }}
+              className="mt-2 text-xs font-bold text-[#5e48d5] hover:underline cursor-pointer"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-[#dedbd3] bg-white p-5">
-          <div className="flex items-center gap-2 mb-2"><Database className="w-5 h-5 text-[#5e48d5]" /><h3 className="font-black text-lg">Una ruta, varias herramientas</h3></div>
-          <p className="text-sm text-[#5c5851] leading-relaxed">Organiza tus materiales en Drive, investiga con NotebookLM, analiza con un asistente IA y comunica los resultados con Canva, video o una aplicación. No necesitas usar todas las plataformas: elige las que aporten valor.</p>
+        <div className="rounded-2xl border-2 border-[#dedbd3] bg-white p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Database className="w-5 h-5 text-[#5e48d5]" />
+            <h3 className="font-black text-lg">Una ruta, varias herramientas</h3>
+          </div>
+          <p className="text-xs sm:text-sm text-[#5c5851] leading-relaxed">
+            Organiza tus materiales en Drive, investiga con NotebookLM, analiza con un asistente IA y comunica los resultados con Canva, video o una aplicación. No necesitas usar todas las plataformas: elige las que aporten valor.
+          </p>
         </div>
-        <div className="rounded-2xl border border-[#dedbd3] bg-white p-5">
-          <div className="flex items-center gap-2 mb-2"><Clock3 className="w-5 h-5 text-[#5e48d5]" /><h3 className="font-black text-lg">Antes de empezar</h3></div>
-          <p className="text-sm text-[#5c5851] leading-relaxed">Los planes, precios y límites cambian. Revisa las condiciones de cada servicio. No cargues datos personales, clínicos, jurídicos o de menores sin autorización y medidas adecuadas de protección. Verifica siempre los resultados de IA.</p>
+        <div className="rounded-2xl border-2 border-[#dedbd3] bg-white p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock3 className="w-5 h-5 text-[#5e48d5]" />
+            <h3 className="font-black text-lg">Antes de empezar</h3>
+          </div>
+          <p className="text-xs sm:text-sm text-[#5c5851] leading-relaxed">
+            Los planes, precios y límites cambian. Revisa las condiciones de cada servicio. No cargues datos personales, clínicos, jurídicos o de menores sin autorización y medidas adecuadas de protección. Verifica siempre los resultados de IA.
+          </p>
         </div>
       </div>
 
       {activeTool && (
-        <div className="fixed inset-0 z-[70] bg-black/60 p-4 flex items-center justify-center" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) setActiveTool(null); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="ai-tool-title" className="w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-2xs p-4 flex items-center justify-center animate-in fade-in"
+          role="presentation"
+          onMouseDown={e => { if (e.target === e.currentTarget) setActiveTool(null); }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-tool-title"
+            className="w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl border-2 border-[#111111]"
+          >
             <div className="flex items-start justify-between gap-4">
-              <div><p className="text-[10px] uppercase tracking-widest text-[#5e48d5] font-black mb-1">Ficha de herramienta</p><h3 id="ai-tool-title" className="text-2xl font-black">{activeTool.name}</h3></div>
-              <button onClick={() => setActiveTool(null)} className="p-2 rounded-full hover:bg-stone-100" aria-label="Cerrar ficha"><X className="w-5 h-5" /></button>
+              <div className="flex items-center gap-3">
+                <ToolLogo name={activeTool.name} size="lg" />
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-[#5e48d5] font-black">
+                    Ficha de herramienta
+                  </p>
+                  <h3 id="ai-tool-title" className="text-2xl font-black text-[#111111]">
+                    {activeTool.name}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTool(null)}
+                className="p-2 rounded-full hover:bg-stone-100 text-stone-500 cursor-pointer"
+                aria-label="Cerrar ficha"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <p className="text-sm text-[#55514a] leading-relaxed mt-4">{activeTool.description}</p>
-            <h4 className="font-black text-sm mt-5 mb-2">¿Qué puedes hacer?</h4>
-            <ul className="list-disc pl-5 text-sm text-[#55514a] space-y-1">{activeTool.uses.map(use => <li key={use}>{use}</li>)}</ul>
-            <div className="flex flex-wrap gap-2 mt-5"><span className="text-xs rounded-full bg-stone-100 px-3 py-1.5">{levelLabel[activeTool.level]}</span><span className="text-xs rounded-full bg-stone-100 px-3 py-1.5">{activeTool.access}</span></div>
-            <a href={activeTool.url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center justify-center gap-2 w-full rounded-full bg-[#f8c300] hover:bg-[#e5b300] text-[#111] font-black text-sm py-3">Explorar {activeTool.name} <ExternalLink className="w-4 h-4" /></a>
+
+            <p className="text-xs sm:text-sm text-[#55514a] leading-relaxed mt-4">
+              {activeTool.description}
+            </p>
+
+            <h4 className="font-black text-xs uppercase tracking-wider text-stone-900 mt-5 mb-2">
+              ¿Qué puedes hacer en el taller?
+            </h4>
+            <ul className="list-disc pl-5 text-xs text-[#55514a] space-y-1">
+              {activeTool.uses.map(use => <li key={use}>{use}</li>)}
+            </ul>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-stone-600 mt-5 pt-3 border-t border-stone-100">
+              <span>Nivel: <strong className="text-stone-900">{levelLabel[activeTool.level]}</strong></span>
+              <span>·</span>
+              <span>Acceso: <strong className="text-stone-900">{activeTool.access}</strong></span>
+            </div>
+
+            <a
+              href={activeTool.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex items-center justify-center gap-2 w-full rounded-2xl bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black text-sm py-3.5 shadow-sm transition active:scale-95 cursor-pointer"
+            >
+              <span>Explorar {activeTool.name}</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
           </section>
         </div>
       )}

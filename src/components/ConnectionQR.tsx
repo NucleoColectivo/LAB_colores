@@ -78,22 +78,20 @@ export const ConnectionQR: React.FC<ConnectionQRProps> = ({ onScrollToForm }) =>
             <span>Punto de Inicio · Escanea para Participar</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-[#111111]">
-            Antes de llenar tus datos: escanea y conéctate
+            Conexión en vivo: escanea y conéctate
           </h2>
           <p className="text-sm sm:text-base text-[#6e6b66] mt-1 max-w-2xl">
-            Abre la cámara de tu celular y enfoca el código para abrir la ficha en tu móvil o unirte al grupo de WhatsApp del laboratorio.
+            Abre la cámara de tu celular y enfoca el código para abrir la plataforma en tu móvil y unirte al grupo de WhatsApp del laboratorio.
           </p>
         </div>
 
-        {onScrollToForm && (
-          <button
-            onClick={onScrollToForm}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-xs sm:text-sm transition shadow-xs self-start sm:self-auto cursor-pointer"
-          >
-            <span>Ir directo al formulario ↓</span>
-            <ArrowDown className="w-3.5 h-3.5" />
-          </button>
-        )}
+        <a
+          href="#herramientas-ia"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-full text-xs sm:text-sm transition shadow-xs self-start sm:self-auto cursor-pointer"
+        >
+          <span>Explorar Herramientas IA ↓</span>
+          <ArrowDown className="w-3.5 h-3.5" />
+        </a>
       </div>
 
       {/* DUAL QR DISPLAY SIDE-BY-SIDE */}
@@ -258,21 +256,33 @@ export const ConnectionQR: React.FC<ConnectionQRProps> = ({ onScrollToForm }) =>
         </div>
       </div>
 
-      {/* Guide Banner before filling data */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#fff9db] border-l-4 border-[#f8c300] text-xs text-stone-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <strong className="text-stone-900 font-bold block text-sm mb-0.5">
-            ¿Ya escaneaste o estás navegando desde tu dispositivo?
-          </strong>
-          <span>Avanza al <strong>Paso 01</strong> aquí abajo para ingresar tu nombre, datos de contacto y lenguajes artísticos.</span>
+      {/* Guide Banner with Workshop Photo */}
+      <div className="rounded-3xl bg-white border-2 border-stone-200 p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-stone-300 shrink-0">
+            <img
+              src="/src/assets/images/comunidad_conversacion_taller_1794090700467.jpg"
+              alt="Participantes del laboratorio en Casa de Cultura"
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div>
+            <h4 className="text-base sm:text-lg font-black text-[#111111]">
+              ¿Ya abriste la plataforma en tu móvil?
+            </h4>
+            <p className="text-xs text-stone-600 mt-0.5 leading-relaxed">
+              Tus avances y fichas se guardan localmente y se sincronizan con la vitrina general del laboratorio para la muestra abierta.
+            </p>
+          </div>
         </div>
 
         {onScrollToForm && (
           <button
             onClick={onScrollToForm}
-            className="inline-flex items-center gap-1 px-4 py-2 bg-[#111111] hover:bg-stone-800 text-white font-bold rounded-full text-xs shrink-0 transition cursor-pointer"
+            className="px-6 py-3 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-xl text-xs sm:text-sm shrink-0 transition cursor-pointer shadow-xs active:scale-95"
           >
-            <span>Llenar mis datos ahora ↓</span>
+            <span>Ir a Herramientas IA →</span>
           </button>
         )}
       </div>

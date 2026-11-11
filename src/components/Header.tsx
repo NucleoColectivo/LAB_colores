@@ -2,6 +2,8 @@ import React from 'react';
 import { Sparkles, Tv, Compass, Layers, Users, QrCode, ExternalLink, Network, MessageCircle, HelpCircle, Bell, Zap, User, ShieldCheck, Cpu } from 'lucide-react';
 import { OFFICIAL_WORKSHOP_URL, OFFICIAL_WHATSAPP_GROUP_URL } from '../types';
 
+export type AppSection = 'bienvenida' | 'herramientas' | 'sistema' | 'avances' | 'conexion';
+
 interface HeaderProps {
   onOpenProjector: () => void;
   onOpenWelcome: () => void;
@@ -10,6 +12,8 @@ interface HeaderProps {
   currentUserName?: string;
   contributionCount: number;
   unreadNotificationCount: number;
+  activeSection?: AppSection;
+  onNavigateSection?: (section: AppSection) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,13 +23,18 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenUserProfile,
   currentUserName = 'Manuel Palacio',
   contributionCount,
-  unreadNotificationCount
+  unreadNotificationCount,
+  activeSection = 'bienvenida',
+  onNavigateSection
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#111111] text-white border-b-4 border-[#f8c300] px-4 sm:px-8 py-3 transition-all shadow-md">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2.5 text-white no-underline group">
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('bienvenida') : (window.location.hash = '#bienvenida')}
+            className="flex items-center gap-2.5 text-white no-underline group text-left cursor-pointer"
+          >
             <span className="w-8 h-8 rounded-lg bg-[#f8c300] text-[#111111] flex items-center justify-center font-black text-lg group-hover:rotate-6 transition-transform">
               ✦
             </span>
@@ -37,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
                 LABORATORIO DE MEDIOS DIGITALES E IA
               </span>
             </div>
-          </a>
+          </button>
 
           {/* Mobile controls */}
           <div className="flex items-center gap-1.5 md:hidden">
@@ -65,14 +74,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               )}
             </button>
-            <button
-              onClick={onOpenWelcome}
-              className="p-1.5 bg-stone-800 text-[#f8c300] rounded-full text-xs font-bold"
-              title="Bienvenida e introducción"
-              aria-label="Bienvenida al laboratorio"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </button>
             <a
               href={OFFICIAL_WHATSAPP_GROUP_URL}
               target="_blank"
@@ -94,94 +95,135 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        <nav aria-label="Navegación principal" className="flex items-center gap-1 sm:gap-1.5 flex-wrap text-xs sm:text-sm">
+        {/* Mobile Section Switcher */}
+        <div className="flex md:hidden items-center gap-1.5 overflow-x-auto scrollbar-none py-1 border-t border-stone-800 text-xs font-mono font-bold">
           <button
-            onClick={onOpenWelcome}
-            className="px-2.5 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap shrink-0"
-            title="Ver bienvenida general y principios del laboratorio"
+            onClick={() => onNavigateSection ? onNavigateSection('bienvenida') : (window.location.hash = '#bienvenida')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              activeSection === 'bienvenida'
+                ? 'bg-[#f8c300] text-[#111111]'
+                : 'bg-stone-900 text-stone-300'
+            }`}
           >
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>Bienvenida</span>
+            <span>01. Bienvenida</span>
           </button>
-          <a
-            href="#ruta"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 whitespace-nowrap shrink-0"
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('herramientas') : (window.location.hash = '#herramientas-ia')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              activeSection === 'herramientas'
+                ? 'bg-[#f8c300] text-[#111111]'
+                : 'bg-stone-900 text-stone-300'
+            }`}
           >
-            <Compass className="w-3.5 h-3.5 text-[#f8c300]" />
-            <span>Ruta</span>
-          </a>
-          <a
-            href="#participar"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 whitespace-nowrap shrink-0"
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>02. Herramientas</span>
+          </button>
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('sistema') : (window.location.hash = '#sistema-creativo')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              activeSection === 'sistema'
+                ? 'bg-[#f8c300] text-[#111111]'
+                : 'bg-stone-900 text-stone-300'
+            }`}
           >
-            <Users className="w-3.5 h-3.5 text-[#ff4fa3]" />
-            <span>Participar</span>
-          </a>
-          <a
-            href="#mapa"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 relative whitespace-nowrap shrink-0"
+            <Compass className="w-3.5 h-3.5" />
+            <span>03. Sistema</span>
+          </button>
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('avances') : (window.location.hash = '#co-creacion')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              activeSection === 'avances'
+                ? 'bg-[#f8c300] text-[#111111]'
+                : 'bg-stone-900 text-stone-300'
+            }`}
           >
-            <Layers className="w-3.5 h-3.5 text-[#7656ff]" />
-            <span>Mapa</span>
-            {contributionCount > 0 && (
-              <span className="bg-[#7656ff] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                {contributionCount}
-              </span>
-            )}
-          </a>
-          <a
-            href="#comunidad"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 whitespace-nowrap shrink-0"
+            <Layers className="w-3.5 h-3.5" />
+            <span>04. Avances</span>
+          </button>
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('conexion') : (window.location.hash = '#conexion')}
+            className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shrink-0 cursor-pointer ${
+              activeSection === 'conexion'
+                ? 'bg-[#f8c300] text-[#111111]'
+                : 'bg-stone-900 text-stone-300'
+            }`}
           >
-            <Network className="w-3.5 h-3.5 text-[#22c55e]" />
-            <span>Red</span>
-          </a>
-          <a
-            href="#ideas"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 whitespace-nowrap shrink-0"
+            <QrCode className="w-3.5 h-3.5" />
+            <span>05. QR</span>
+          </button>
+        </div>
+
+        {/* Desktop Navigation Bar */}
+        <nav aria-label="Navegación de secciones del taller" className="hidden md:flex items-center gap-1 sm:gap-1.5 flex-wrap text-xs sm:text-sm">
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('bienvenida') : (window.location.hash = '#bienvenida')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 ${
+              activeSection === 'bienvenida'
+                ? 'bg-[#f8c300] text-[#111111] shadow-xs ring-2 ring-[#f8c300]/50'
+                : 'text-stone-300 hover:text-white hover:bg-white/10'
+            }`}
+            title="Bienvenida, manifiesto, 4 momentos y programa de 5 clases"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#f8c300]" />
-            <span>Cruces</span>
-          </a>
-          <a
-            href="#sistema-creativo"
-            className="px-2.5 py-1.5 rounded-lg text-white bg-white/10 hover:bg-[#f8c300] hover:text-[#111111] transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0"
+            <span className="font-mono text-xs">01.</span>
+            <span>Bienvenida & Ruta</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('herramientas') : (window.location.hash = '#herramientas-ia')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 ${
+              activeSection === 'herramientas'
+                ? 'bg-[#f8c300] text-[#111111] shadow-xs ring-2 ring-[#f8c300]/50'
+                : 'text-stone-300 hover:text-white hover:bg-white/10'
+            }`}
+            title="Herramientas IA organizadas por temas y necesidades del taller"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${activeSection === 'herramientas' ? 'text-[#111111]' : 'text-[#f8c300]'}`} />
+            <span>02. Herramientas IA</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('sistema') : (window.location.hash = '#sistema-creativo')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 ${
+              activeSection === 'sistema'
+                ? 'bg-[#f8c300] text-[#111111] shadow-xs ring-2 ring-[#f8c300]/50'
+                : 'text-stone-300 hover:text-white hover:bg-white/10'
+            }`}
             title="Sistema de Creación Asistida por IA: De la intención a la obra"
           >
-            <Compass className="w-3.5 h-3.5 text-[#f8c300] group-hover:text-[#111111]" />
-            <span>Sistema Creativo</span>
-          </a>
-          <a
-            href="#biblioteca-ia"
-            className="px-2.5 py-1.5 rounded-lg text-white bg-[#7656ff]/20 hover:bg-[#f8c300] hover:text-[#111111] border border-[#7656ff]/40 transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0 group"
-            title="Biblioteca de 30 Herramientas IA: gratuitas, con créditos o de bajo costo para ensayar"
+            <Compass className={`w-3.5 h-3.5 ${activeSection === 'sistema' ? 'text-[#111111]' : 'text-[#f8c300]'}`} />
+            <span>03. Sistema Creativo</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('avances') : (window.location.hash = '#co-creacion')}
+            className={`px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 ${
+              activeSection === 'avances'
+                ? 'bg-[#f8c300] text-[#111111] shadow-xs ring-2 ring-[#f8c300]/50'
+                : 'text-stone-300 hover:text-white hover:bg-white/10'
+            }`}
+            title="Avances y entregables del taller"
           >
-            <Cpu className="w-3.5 h-3.5 text-[#f8c300] group-hover:text-[#111111]" />
-            <span>Biblioteca IA</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[#f8c300] text-[#111111] font-mono font-black">
-              30
-            </span>
-          </a>
-          <a
-            href="#visual-prompt-lab"
-            className="px-2.5 py-1.5 rounded-lg text-[#b7ff4a] bg-[#b7ff4a]/10 hover:bg-[#b7ff4a] hover:text-[#111111] border border-[#b7ff4a]/30 transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0"
-            title="Biblioteca interactiva de fotografía y cinematografía"
+            <Layers className={`w-3.5 h-3.5 ${activeSection === 'avances' ? 'text-[#111111]' : 'text-[#f8c300]'}`} />
+            <span>04. Avances ({contributionCount})</span>
+          </button>
+
+          <button
+            onClick={() => onNavigateSection ? onNavigateSection('conexion') : (window.location.hash = '#conexion')}
+            className={`px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 font-bold cursor-pointer whitespace-nowrap shrink-0 ${
+              activeSection === 'conexion'
+                ? 'bg-[#f8c300] text-[#111111] shadow-xs ring-2 ring-[#f8c300]/50'
+                : 'text-stone-300 hover:text-white hover:bg-white/10'
+            }`}
+            title="Códigos QR y conexión en vivo"
           >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>Visual Prompt Lab</span>
-          </a>
-          <a
-            href="#co-creacion"
-            className="px-2 py-1.5 rounded-lg text-[#f8c300] hover:text-white hover:bg-white/10 transition flex items-center gap-1 font-bold whitespace-nowrap shrink-0"
-          >
-            <Layers className="w-3.5 h-3.5 text-[#f8c300]" />
-            <span>Avances</span>
-          </a>
+            <QrCode className="w-3.5 h-3.5 text-stone-300" />
+            <span>05. Conexión QR</span>
+          </button>
 
           {/* Desktop Notification Center button */}
           <button
             onClick={onOpenNotifications}
-            className="relative px-2.5 py-1.5 rounded-lg text-stone-200 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0"
+            className="relative px-2.5 py-1.5 rounded-lg text-stone-200 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 ml-1"
             title="Avisos de sugerencias de prompt para la mesa de trabajo"
           >
             <Bell className={`w-3.5 h-3.5 ${unreadNotificationCount > 0 ? 'text-[#f8c300] animate-pulse' : 'text-stone-300'}`} />
@@ -192,14 +234,6 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             ) : null}
           </button>
-
-          <a
-            href="#conexion"
-            className="px-2 py-1.5 rounded-lg text-stone-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1 whitespace-nowrap shrink-0"
-          >
-            <QrCode className="w-3.5 h-3.5 text-stone-300" />
-            <span>QR & Chat</span>
-          </a>
 
           {/* User Profile & Carnet QR Button */}
           {onOpenUserProfile && (

@@ -82,7 +82,7 @@ export const Hero: React.FC<HeroProps> = ({
             </span>
           </div>
 
-          {/* Action buttons: QRs FIRST, then form, then WhatsApp */}
+          {/* Action buttons: direct access to workshop content */}
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={onScrollToQr}
@@ -102,46 +102,28 @@ export const Hero: React.FC<HeroProps> = ({
               <ExternalLink className="w-4 h-4" />
             </a>
 
-            <button
-              onClick={onScrollToForm}
-              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-stone-100 hover:bg-stone-200 text-[#111111] border border-stone-300 font-bold rounded-full text-sm transition cursor-pointer"
-            >
-              <span>Llenar ficha aquí</span>
-              <ArrowDown className="w-3.5 h-3.5" />
-            </button>
-
-            <button
-              onClick={onScrollToNetwork}
-              className="inline-flex items-center gap-2 px-4 py-3.5 bg-white hover:bg-stone-100 text-[#111111] border border-[#dedbd3] font-bold rounded-full text-sm transition cursor-pointer"
-            >
-              <Users className="w-4 h-4 text-[#7656ff]" />
-              <span>Red ({totalContributions})</span>
-            </button>
-
-            {onScrollToCoCreation && (
-              <button
-                onClick={onScrollToCoCreation}
-                className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-[#eee9ff] hover:bg-[#ded4ff] text-[#5e48d5] font-black rounded-full text-sm transition cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-[#7656ff]" />
-                <span>Unir ideas y avances ↓</span>
-              </button>
-            )}
-
             <a
-              href="#sistema-creativo"
-              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-[#f8c300]/20 hover:bg-[#f8c300]/35 text-[#111111] border border-[#f8c300] font-black rounded-full text-sm transition cursor-pointer"
+              href="#herramientas-ia"
+              className="inline-flex items-center gap-2 px-5 py-3.5 bg-[#7656ff] hover:bg-[#5e48d5] text-white font-black rounded-full text-sm transition shadow-sm cursor-pointer"
             >
-              <Compass className="w-4 h-4 text-[#111111]" />
-              <span>Sistema Creativo IA ↓</span>
+              <Sparkles className="w-4 h-4 text-[#f8c300]" />
+              <span>Herramientas IA por Temas ↓</span>
             </a>
 
             <a
-              href="#biblioteca-ia"
-              className="inline-flex items-center gap-2 px-4 py-3.5 bg-stone-900 hover:bg-[#7656ff] text-white font-bold rounded-full text-sm transition cursor-pointer shadow-xs"
+              href="#sistema-creativo"
+              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-full text-sm transition cursor-pointer"
             >
-              <Cpu className="w-4 h-4 text-[#f8c300]" />
-              <span>Biblioteca IA (30) ↓</span>
+              <Compass className="w-4 h-4 text-[#f8c300]" />
+              <span>Sistema Creativo & Intención ↓</span>
+            </a>
+
+            <a
+              href="#co-creacion"
+              className="inline-flex items-center gap-1.5 px-4 py-3.5 bg-white hover:bg-stone-100 text-[#111111] border border-[#dedbd3] font-bold rounded-full text-sm transition cursor-pointer"
+            >
+              <Clock className="w-4 h-4 text-[#7656ff]" />
+              <span>Avances del Taller ↓</span>
             </a>
           </div>
         </div>

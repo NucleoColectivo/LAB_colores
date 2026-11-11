@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { VisualPromptLab } from './components/VisualPromptLab';
+import { Sparkles, Compass, Layers, Clock, QrCode, ArrowRight, Tv, User, ExternalLink } from 'lucide-react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
+import { WelcomeSection } from './components/WelcomeSection';
 import { WorkshopRoute } from './components/WorkshopRoute';
 import { ConnectionQR } from './components/ConnectionQR';
-import { ParticipantForm } from './components/ParticipantForm';
-import { CollectiveMap } from './components/CollectiveMap';
-import { UserNetwork } from './components/UserNetwork';
-import { CreativeCrosses } from './components/CreativeCrosses';
+import { AiToolsSection } from './components/AiToolsSection';
 import { CreativeSystemSection } from './components/creativeSystem/CreativeSystemSection';
-import { AiToolsLibrary } from './components/AiToolsLibrary';
 import { CoCreationAdvances } from './components/CoCreationAdvances';
 import { ProjectorModal } from './components/ProjectorModal';
 import { WelcomeModal } from './components/WelcomeModal';
@@ -67,7 +64,45 @@ const createNotificationFromAdvance = (adv: WorkshopAdvance, isRead = false): Sp
   };
 };
 
+export type AppSection = 'bienvenida' | 'herramientas' | 'sistema' | 'avances' | 'conexion';
+
+const parseHashToSection = (): AppSection => {
+  if (typeof window === 'undefined') return 'bienvenida';
+  const hash = window.location.hash.toLowerCase();
+  if (hash.includes('herramienta')) return 'herramientas';
+  if (hash.includes('sistema')) return 'sistema';
+  if (hash.includes('avance') || hash.includes('co-creacion')) return 'avances';
+  if (hash.includes('conexion') || hash.includes('qr')) return 'conexion';
+  if (hash.includes('bienvenida') || hash.includes('ruta')) return 'bienvenida';
+  return 'bienvenida';
+};
+
 export default function App() {
+  const [activeSection, setActiveSection] = useState<AppSection>(() => parseHashToSection());
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setActiveSection(parseHashToSection());
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const handleNavigateSection = (section: AppSection) => {
+    setActiveSection(section);
+    const hashMap: Record<AppSection, string> = {
+      bienvenida: '#bienvenida',
+      herramientas: '#herramientas-ia',
+      sistema: '#sistema-creativo',
+      avances: '#co-creacion',
+      conexion: '#conexion'
+    };
+    try {
+      history.replaceState(null, '', hashMap[section]);
+    } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const [contributions, setContributions] = useState<ParticipantContribution[]>(INITIAL_SEED_DATA);
   const [advances, setAdvances] = useState<WorkshopAdvance[]>(INITIAL_SEED_ADVANCES);
   const [notifications, setNotifications] = useState<SparkNotification[]>(() => {
@@ -470,72 +505,203 @@ export default function App() {
         currentUserName={currentUser.name || currentUser.alias}
         contributionCount={contributions.length}
         unreadNotificationCount={unreadNotificationCount}
+        activeSection={activeSection}
+        onNavigateSection={handleNavigateSection}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-6 space-y-4">
-        {/* HERO SECTION */}
-        <Hero
-          onScrollToForm={scrollToForm}
-          onScrollToQr={scrollToQr}
-          onScrollToMap={scrollToMap}
-          onScrollToNetwork={scrollToNetwork}
-          onScrollToCoCreation={scrollToCoCreation}
-          onOpenWelcome={() => setIsWelcomeOpen(true)}
-          totalContributions={contributions.length}
-        />
+      {/* WORKSPACE NAVIGATION BAR */}
+      <div className="bg-[#191919] text-white border-b border-stone-800 sticky top-[61px] z-30 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {[
+              { id: 'bienvenida', label: '01. Bienvenida & Ruta', icon: Compass, badge: '5 Clases' },
+              { id: 'herramientas', label: '02. Herramientas IA', icon: Sparkles, badge: '9 Temas' },
+              { id: 'sistema', label: '03. Sistema Creativo', icon: Layers, badge: 'Ficha & Prompts' },
+              { id: 'avances', label: '04. Avances del Taller', icon: Tv, badge: `${advances.length}` },
+              { id: 'conexion', label: '05. Conexión QR', icon: QrCode, badge: 'Móvil' }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeSection === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleNavigateSection(tab.id as AppSection)}
+                  className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition cursor-pointer whitespace-nowrap shrink-0 ${
+                    isActive
+                      ? 'bg-[#f8c300] text-[#111111] shadow-sm ring-2 ring-[#f8c300]/50'
+                      : 'bg-stone-900/90 hover:bg-stone-800 text-stone-300 hover:text-white border border-stone-800'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#111111]' : 'text-[#f8c300]'}`} />
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md ${
+                    isActive ? 'bg-[#111111] text-[#f8c300]' : 'bg-stone-800 text-stone-400'
+                  }`}>
+                    {tab.badge}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* METODOLOGÍA VIVA: RUTA DE LA MAÑANA */}
-        <WorkshopRoute />
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <span className="text-stone-400 text-xs font-mono">
+              ✦ Núcleo Colectivo · Taller en Vivo
+            </span>
+            <button
+              onClick={() => setIsProjectorOpen(true)}
+              className="px-2.5 py-1 bg-stone-800 hover:bg-[#f8c300] hover:text-[#111111] text-[#f8c300] rounded-lg text-xs font-mono font-bold transition flex items-center gap-1 cursor-pointer border border-stone-700"
+            >
+              <Tv className="w-3.5 h-3.5" />
+              <span>Sprint 15m</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-        {/* 00. ESCANEA PARA INICIAR: LOS QR ANTES DE LOS DATOS */}
-        <ConnectionQR onScrollToForm={scrollToForm} />
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-8 py-6">
+        {/* SECCIÓN 1: BIENVENIDA, MANIFIESTO, 4 MOMENTOS & 5 CLASES */}
+        {activeSection === 'bienvenida' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            <WelcomeSection
+              onNavigateSection={handleNavigateSection}
+              onOpenProjector={() => setIsProjectorOpen(true)}
+              onOpenUserProfile={() => handleOpenUserProfileModal('carnet')}
+              currentUserName={currentUser.name || currentUser.alias}
+            />
+          </div>
+        )}
 
-        {/* 01. REGISTRO Y AFINIDADES: FICHA CON DATOS Y LENGUAJES */}
-        <ParticipantForm onSubmit={handleSubmitContribution} />
+        {/* SECCIÓN 2: HERRAMIENTAS IA POR TEMAS */}
+        {activeSection === 'herramientas' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            <AiToolsSection />
 
-        {/* 02. MAPA COLECTIVO DE AFINIDADES */}
-        <CollectiveMap
-          contributions={contributions}
-          onRefresh={handleRefresh}
-          onClearAll={handleClearAll}
-          onImportJson={handleImportJson}
-          onLoadSeedData={handleLoadSeedData}
-        />
+            {/* Cross-navigation bar */}
+            <div className="bg-[#111111] text-white p-6 sm:p-7 rounded-3xl border-2 border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+              <div className="space-y-1">
+                <span className="text-xs font-mono font-black text-[#f8c300] uppercase tracking-wider block">
+                  Paso siguiente en la mesa de trabajo:
+                </span>
+                <h4 className="text-lg sm:text-xl font-black">
+                  ¿Ya encontraste la herramienta para tu idea? Dale propósito en el Sistema Creativo
+                </h4>
+                <p className="text-xs text-stone-400">
+                  Define tu pregunta generadora, dirección de arte y genera prompts maestros paso a paso.
+                </p>
+              </div>
+              <button
+                onClick={() => handleNavigateSection('sistema')}
+                className="px-6 py-3 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-2xl text-xs transition flex items-center gap-2 cursor-pointer shrink-0 shadow-sm"
+              >
+                <span>Ir al Sistema Creativo & Ficha</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* 03. RED DE CREADORES DEL TALLER (DIRECTORIO DE PARTICIPANTES) */}
-        <UserNetwork
-          contributions={contributions}
-          onOpenUserCard={(user) => {
-            handleSelectUser(user);
-            handleOpenUserProfileModal('carnet');
-          }}
-        />
+        {/* SECCIÓN 3: SISTEMA CREATIVO ASISTIDO POR IA */}
+        {activeSection === 'sistema' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            <CreativeSystemSection
+              onAddAdvance={handleAddAdvance}
+              onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+            />
 
-        {/* 04. CRUCES PARA IMAGINAR (LABORATORIO DE CRUCES CREATIVOS) */}
-        <CreativeCrosses contributions={contributions} />
+            {/* Cross-navigation bar */}
+            <div className="bg-[#111111] text-white p-6 sm:p-7 rounded-3xl border-2 border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+              <div className="space-y-1">
+                <span className="text-xs font-mono font-black text-[#f8c300] uppercase tracking-wider block">
+                  Paso siguiente en la mesa de trabajo:
+                </span>
+                <h4 className="text-lg sm:text-xl font-black">
+                  ¿Ya tienes tu prompt, imagen o boceto listo? Publícalo en los Avances
+                </h4>
+                <p className="text-xs text-stone-400">
+                  Comparte tu prototipo con el grupo para alimentarlo con música, video o interactividad.
+                </p>
+              </div>
+              <button
+                onClick={() => handleNavigateSection('avances')}
+                className="px-6 py-3 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-2xl text-xs transition flex items-center gap-2 cursor-pointer shrink-0 shadow-sm"
+              >
+                <span>Ver y Registrar Avances</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* 05. SISTEMA DE CREACIÓN ASISTIDA POR IA: DE LA INTENCIÓN A LA OBRA (lab-colores.vercel.app) */}
-        <CreativeSystemSection
-          onAddAdvance={handleAddAdvance}
-          onOpenNotifications={() => setIsNotificationCenterOpen(true)}
-        />
+        {/* SECCIÓN 4: AVANCES Y PROTOTIPOS DEL TALLER */}
+        {activeSection === 'avances' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            <CoCreationAdvances
+              contributions={contributions}
+              advances={advances}
+              onAddAdvance={handleAddAdvance}
+              onDeleteAdvance={handleDeleteAdvance}
+              onRefresh={fetchAdvancesFromServer}
+              onOpenNotifications={() => setIsNotificationCenterOpen(true)}
+              unreadNotificationCount={unreadNotificationCount}
+            />
 
-        {/* VISUAL PROMPT LAB: biblioteca de fotografía, video y constructor de prompts */}
-        <VisualPromptLab />
+            {/* Cross-navigation bar */}
+            <div className="bg-white p-6 sm:p-7 rounded-3xl border-2 border-[#dedbd3] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="space-y-1">
+                <span className="text-xs font-mono font-black text-[#7656ff] uppercase tracking-wider block">
+                  Continuar explorando:
+                </span>
+                <h4 className="text-lg sm:text-xl font-black text-[#111111]">
+                  ¿Quieres ensayar con otra herramienta o ajustar tu ficha?
+                </h4>
+                <p className="text-xs text-stone-600">
+                  Explora video, audio, 3D o regresa a los prompts maestros en cualquier momento.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5 shrink-0">
+                <button
+                  onClick={() => handleNavigateSection('herramientas')}
+                  className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-[#111111] font-bold rounded-xl text-xs transition cursor-pointer border border-stone-300"
+                >
+                  Herramientas IA
+                </button>
+                <button
+                  onClick={() => handleNavigateSection('sistema')}
+                  className="px-5 py-2.5 bg-[#111111] hover:bg-stone-800 text-[#f8c300] font-black rounded-xl text-xs transition cursor-pointer shadow-xs"
+                >
+                  Sistema Creativo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* 06. BIBLIOTECA DE HERRAMIENTAS IA (DIRECTORIO ABIERTO PARA ENSAYOS Y PROTOTIPADO) */}
-        <AiToolsLibrary />
+        {/* SECCIÓN 5: CONEXIÓN & QR EN VIVO */}
+        {activeSection === 'conexion' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            <ConnectionQR onScrollToForm={() => handleNavigateSection('herramientas')} />
 
-        {/* 07. UNIR IDEAS Y AVANCES DEL TALLER (INDIVIDUALES Y COLECTIVOS -> REPOSITORIO LAB-COLORES.VERCEL.APP) */}
-        <CoCreationAdvances
-          contributions={contributions}
-          advances={advances}
-          onAddAdvance={handleAddAdvance}
-          onDeleteAdvance={handleDeleteAdvance}
-          onRefresh={fetchAdvancesFromServer}
-          onOpenNotifications={() => setIsNotificationCenterOpen(true)}
-          unreadNotificationCount={unreadNotificationCount}
-        />
+            {/* Quick jump */}
+            <div className="bg-[#111111] text-white p-6 sm:p-7 rounded-3xl border-2 border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+              <div className="space-y-1">
+                <span className="text-xs font-mono font-black text-[#f8c300] uppercase tracking-wider block">
+                  Dispositivos conectados:
+                </span>
+                <h4 className="text-lg sm:text-xl font-black">
+                  ¿Ya tienes abierta la plataforma en tu móvil? Comienza a explorar
+                </h4>
+              </div>
+              <button
+                onClick={() => handleNavigateSection('herramientas')}
+                className="px-6 py-3 bg-[#f8c300] hover:bg-[#e5b300] text-[#111111] font-black rounded-2xl text-xs transition flex items-center gap-2 cursor-pointer shrink-0 shadow-sm"
+              >
+                <span>Comenzar en Herramientas IA</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

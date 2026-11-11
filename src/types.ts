@@ -119,28 +119,28 @@ export const FACILITATOR_EMAIL = "nucleo.colectivo.art@gmail.com";
 export const WORKSHOP_STEPS: WorkshopStep[] = [
   {
     num: "01",
-    time: "9:00 – 9:25",
-    title: "Conocernos",
-    desc: "Roles, expectativas, Habeas Data y conexión al grupo de WhatsApp.",
-    objective: "Generar confianza y reconocer la diversidad del grupo."
+    time: "9:00 – 9:30",
+    title: "Intención y Enfoque",
+    desc: "Definir el propósito del proyecto, preguntas de partida y conexión de dispositivos.",
+    objective: "Aclarar la intención antes de elegir cualquier herramienta tecnológica."
   },
   {
     num: "02",
-    time: "9:25 – 10:15",
-    title: "Ideas individuales",
-    desc: "Cada participante plantea su idea de partida, intereses y memorias.",
-    objective: "Mapear los deseos creativos propios y recursos disponibles."
+    time: "9:30 – 10:30",
+    title: "Herramientas IA por Temas",
+    desc: "Explorar la biblioteca por categorías: datos, documentos, imagen, video, audio o web.",
+    objective: "Encontrar la herramienta adecuada a la necesidad real del proyecto."
   },
   {
     num: "03",
-    time: "10:15 – 11:15",
-    title: "Puntos en común",
-    desc: "Encontrar intersecciones: la imagen, lo interactivo, el video, la IA y el sonido.",
-    objective: "Construir alianzas y cruces interdisciplinarios inesperados."
+    time: "10:30 – 11:30",
+    title: "Sprint Creativo 15m",
+    desc: "Generar prompts maestros y primeros bocetos en ensayos sin costo.",
+    objective: "Construir prototipos rápidos y validar ideas con el grupo."
   },
   {
     num: "04",
-    time: "11:15 – 12:30",
+    time: "11:30 – 12:30",
     title: "Avances y Repositorio",
     desc: "Documentar avances individuales y colectivos para lab-colores.vercel.app.",
     objective: "Consolidar prototipos y publicar la memoria viva del taller."

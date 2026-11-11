@@ -26,6 +26,7 @@ import {
   FileText
 } from 'lucide-react';
 import { AI_TOOLS_CATALOG, WORKSHOP_TRIAL_RULES, AiTool } from '../data/aiToolsData';
+import { ToolLogo } from './common/ToolLogo';
 
 interface AiToolsLibraryProps {
   onSelectToolForProject?: (toolName: string) => void;
@@ -331,13 +332,16 @@ export const AiToolsLibrary: React.FC<AiToolsLibraryProps> = ({
               {/* Card Top: Badges and Header */}
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500 block">
-                      {tool.provider}
-                    </span>
-                    <h3 className="text-xl font-black text-[#111111] tracking-tight group-hover:text-[#7656ff] transition-colors">
-                      {tool.name}
-                    </h3>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ToolLogo name={tool.name} size="md" />
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-400 block truncate">
+                        {tool.provider}
+                      </span>
+                      <h3 className="text-xl font-black text-[#111111] tracking-tight group-hover:text-[#7656ff] transition-colors truncate">
+                        {tool.name}
+                      </h3>
+                    </div>
                   </div>
 
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
