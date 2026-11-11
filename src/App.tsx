@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { VisualPromptLab } from './components/VisualPromptLab';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { WorkshopRoute } from './components/WorkshopRoute';
@@ -518,6 +519,9 @@ export default function App() {
           onAddAdvance={handleAddAdvance}
           onOpenNotifications={() => setIsNotificationCenterOpen(true)}
         />
+
+        {/* VISUAL PROMPT LAB: biblioteca de fotografía, video y constructor de prompts */}
+        <VisualPromptLab />
 
         {/* 06. BIBLIOTECA DE HERRAMIENTAS IA (DIRECTORIO ABIERTO PARA ENSAYOS Y PROTOTIPADO) */}
         <AiToolsLibrary />
